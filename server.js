@@ -17,63 +17,63 @@ const database = [
     {
         id: 'one',
         name: 'front porch',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.4"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}//for debugging ffmpeg, change loglevel to any correct value other than quiet and it will print to node's stderr since it is marked as inherit
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.4"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}//for debugging ffmpeg, change loglevel to any correct value other than quiet and it will print to node's stderr since it is marked as inherit
     },
     {
         id: 'two',
         name: 'back door',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.5:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.5"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.5:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.5"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
 
     },
     {
         id: 'three',
         name: 'side porch',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.6:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.6"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.6:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.6"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'four',
         name: 'side gate',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.7:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.7"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.7:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.7"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'five',
         name: 'driveway west',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.8:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.8"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.8:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.8"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'six',
         name: 'driveway east',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.9:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.9"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.9:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.9"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'seven',
         name: 'backyard',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.21:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.21"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.21:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.21"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'eight',
         name: 'dining room',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.22:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.22"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.22:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.22"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'nine',
         name: 'living room',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.23:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.23"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.23:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.23"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
         id: 'ten',
         name: 'back hallway',
-        params: ['-loglevel', 'quiet', '-probesize', '32000', '-analyzeduration', '100000000', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'inherit']}
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
     }
 ];
 
@@ -173,6 +173,15 @@ app.get('/', (req, res) => {
 
 app.get('/public/player.js', (req, res) => {
     res.sendFile(__dirname + '/public/player.js');
+});
+
+app.get('/test.mp4', (req, res) => {
+    res.status(200);
+    res.write(streams.ten.mp4segmenter.initSegment);
+    streams.ten.mp4segmenter.pipe(res);
+    res.on('close', () => {
+        streams.ten.mp4segmenter.unpipe(res);
+    });
 });
 
 http.listen(3000, () => {
