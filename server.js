@@ -72,7 +72,7 @@ const database = [
     {
         id: 'ten',
         name: 'back hallway',
-        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
+        params: ['-loglevel', 'quiet', '-probesize', '1024', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']}
     }
 ];
@@ -99,49 +99,68 @@ for (let i = 0; i < database.length; i++) {
         .of(`/${database[i].id}`)//accessing "/namespace" of io based on id of stream
         .on('connection', (socket) => {//listen for connection to /namespace
             console.log(`a user connected to namespace "/${database[i].id}"`);
-
-            const mime = () => {
+            
+            //event listener
+            const onInit = () => {
                 socket.emit('mime', mp4segmenter.mimeType);
+                mp4segmenter.removeListener('ready', onInit);
             };
 
-            const emitSegment = (data) => {
+            //event listener
+            const onSegment = (data) => {
                 socket.emit('segment', data);
                 //console.log('emit segment', data.length);
             };
 
+            //client request
+            const mime = () => {
+                if (mp4segmenter.mimeType) {
+                    socket.emit('mime', mp4segmenter.mimeType);
+                } else {
+                    mp4segmenter.on('init', onInit);
+                }
+            };
+
+            //client request
             const init = () => {
                 socket.emit('init', mp4segmenter.initSegment);
             };
 
+            //client request
             const segment = () => {
-                //console.log('segment');
-                mp4segmenter.on('segment', emitSegment);
+                //add listener for segments being dispatched by mp4segmenter
+                mp4segmenter.on('segment', onSegment);
             };
 
+            //client request
             const pause = () => {//same as stop, for now. may need other logic todo
-                mp4segmenter.removeListener('segment', emitSegment);
+                mp4segmenter.removeListener('segment', onSegment);
             };
 
+            //client request
             const resume = () => {//same as segment, for now. may need other logic todo
-                mp4segmenter.on('segment', emitSegment);
+                mp4segmenter.on('segment', onSegment);
                 //may indicate that we are resuming from paused
             };
 
+            //client request
             const stop = () => {
-                mp4segmenter.removeListener('segment', emitSegment);
+                mp4segmenter.removeListener('segment', onSegment);
+                //may have to remove other listeners if client requests to stop before asking for segments
                 //stop might indicate that we will not request anymore data todo
             };
 
+            //listen to client messages
             socket.on('message', (msg) => {
                 console.log(msg);
                 switch (msg) {
-                    case 'mime' :
+                    case 'mime' ://client is requesting mime
                         mime();
                         break;
-                    case 'init' :
+                    case 'init' ://client is requesting init segment
                         init();
                         break;
-                    case 'segment' :
+                    case 'segment' ://client is requesting segments
                         segment();
                         break;
                     case 'pause' :
@@ -150,7 +169,7 @@ for (let i = 0; i < database.length; i++) {
                     case 'resume' :
                         resume();
                         break;
-                    case 'stop' :
+                    case 'stop' ://client requesting to stop receiving segments
                         stop();
                         break;
                 }
@@ -164,24 +183,14 @@ for (let i = 0; i < database.length; i++) {
         });
 }
 
-//streams are available via streams['abc'] where 'abc' is the assigned id
+//streams are available via streams['abc'] or streams.abc where 'abc' is the assigned id
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-
 app.get('/public/player.js', (req, res) => {
     res.sendFile(__dirname + '/public/player.js');
-});
-
-app.get('/test.mp4', (req, res) => {
-    res.status(200);
-    res.write(streams.ten.mp4segmenter.initSegment);
-    streams.ten.mp4segmenter.pipe(res);
-    res.on('close', () => {
-        streams.ten.mp4segmenter.unpipe(res);
-    });
 });
 
 http.listen(3000, () => {
