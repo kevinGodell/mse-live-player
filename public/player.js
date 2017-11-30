@@ -34,7 +34,7 @@ class VideoPlayer {
             this._callback('"options.io is not an instance of socket.io');
             return;
         }
-        this._socket = options.io(location.origin + this._dataNamespace, {transports: ['websocket']});//only supporting socket.io at this point todo
+        this._socket = options.io(location.origin + this._dataNamespace, {transports: ['websocket'], forceNew: true});//only supporting socket.io at this point todo
 
         //have to set socket error handler todo
 
@@ -155,18 +155,12 @@ class VideoPlayer {
 }
 
 (function () {
-
-    if (!window) {
-        //make sure we are in browser???
-        alert('missing window');
-        //return;
-    }
-
-    if (typeof window.io !== 'function') {
+    
+    if (!('io' in window)) {
         alert('socket.io was not found');
-        //return;
+        return;
     }
-
+    
     //get all video elements on page
     const videos = document.getElementsByTagName('video');
 
@@ -182,6 +176,8 @@ class VideoPlayer {
             }));
         }
     }
+
+    //add some listeners to video element to pass commands into mse
 
 })();
 
