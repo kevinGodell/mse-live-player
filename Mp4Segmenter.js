@@ -90,6 +90,7 @@ class Mp4Segmenter extends Transform {
         this._mimeType = `video/mp4; codecs="avc1.${this._initSegment.slice(index , index + 3).toString('hex').toUpperCase()}${audioString}"`;
         console.log(this._mimeType);
         console.log('init segment ready');
+        this.emit('init');
     }
     
     _findMoof(chunk) {
