@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>player</title>
+    <script src ="/socket.io/socket.io.js"></script>
+    <style>
+        /*video::-webkit-media-controls {
+            display: none;
+        }
+        video::-webkit-media-controls {
+            display:none !important;
+        }
+        video::-webkit-media-controls-fullscreen-button, video::-webkit-media-controls-play-button, video::-webkit-media-controls-pausebutton {
+            display: none;
+        }
+        video::-webkit-media-controls-play-button {
+            display: none;
+        }
+
+        video::-webkit-media-controls-volume-slider {
+            display: none;
+        }
+
+        video::-webkit-media-controls-mute-button {
+            display: none;
+        }
+
+        video::-webkit-media-controls-timeline {
+            display: none;
+        }
+
+        video::-webkit-media-controls-current-time-display {
+            display: none;
+        }
+
+
+        video::-webkit-media-controls-start-playback-button {
+            display: none;
+        }
+
+        video {
+            pointer-events: none;
+        }*/
+
+    </style>
+</head>
+<body>
+
+<video width="320" height="240" data-namespace="/one"></video>
+
+<video width="320" height="240" data-namespace="/two"></video>
+
+<video width="320" height="240" data-namespace="/three"></video>
+
+<video width="320" height="240" data-namespace="/four"></video>
+
+<video width="320" height="240" data-namespace="/five"></video>
+
+<video width="320" height="240" data-namespace="/six"></video>
+
+<video width="320" height="240" data-namespace="/seven"></video>
+
+<video width="320" height="240" data-namespace="/eight"></video>
+
+<video width="320" height="240" data-namespace="/nine"></video>
+
+<video width="320" height="240" id="test"></video>
+
+<!--<button onclick="goFullscreen()">fullscreen</button>-->
+
+<script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
+
+<script>
+    //can also be directly called later by specifically target a video element by its id
+    var vp = new VideoPlayer({video: document.getElementById('test'), io: window.io, namespace: '/ten'});
+</script>
+
+<script>
+
+    /*function goFullscreen() {
+        var i = document.getElementById("one");
+        // go full-screen
+        if (i.requestFullscreen) {
+            i.requestFullscreen();
+        } else if (i.webkitRequestFullscreen) {
+            i.webkitRequestFullscreen();
+        } else if (i.mozRequestFullScreen) {
+            i.mozRequestFullScreen();
+        } else if (i.msRequestFullscreen) {
+            i.msRequestFullscreen();
+        }
+    }*/
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "mse-live-player",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinGodell/mse-live-player.git"
+  },
+  "keywords": [
+    "live",
+    "stream",
+    "fragmented",
+    "mp4",
+    "video",
+    "media",
+    "source",
+    "extensions",
+    "h264",
+    "ffmpeg",
+    "node.js",
+    "socket.io",
+    "express"
+  ],
+  "author": "Kevin Godell <kevin.godell@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinGodell/mse-live-player/issues"
+  },
+  "homepage": "https://github.com/kevinGodell/mse-live-player#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
+}
