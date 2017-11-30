@@ -187,9 +187,25 @@ class Mp4Segmenter extends Transform {
                 //todo almost 100% guaranteed to exceed size of single chunk
                 this._mdatBuffer = [chunk];
                 this._mdatBufferSize = chunkLength;
+            } else if (this._mdatLength === chunkLength) {
+                this._foundSegment = true;
+                const data = Buffer.concat([this._moof, chunk], (this._moofLength + chunkLength));
+                delete this._moof;
+                delete this._moofLength;
+                delete this._mdatLength;
+                if (this._readableState.pipesCount > 0) {
+                    this.push(data);
+                }
+                if (this._callback) {
+                    this._callback(data);
+                }
+                if (this.listenerCount('segment') > 0) {
+                    this.emit('segment', data);
+                }
+                this._parseChunk = this._findMoof;
             } else {
                 console.log(this._mdatLength, chunkLength);
-                throw new Error('mdatLength not greater than chunkLength');
+                throw new Error('mdatLength less than chunkLength');
             }
         }
     }
