@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>player</title>
-    <script src ="/socket.io/socket.io.js"></script>
     <style>
         /*video::-webkit-media-controls {
             display: none;
@@ -65,18 +64,13 @@
 
 <video width="320" height="240" data-namespace="/nine"></video>
 
-<video width="320" height="240" id="test"></video>
+<video width="320" height="240" data-namespace="/ten"></video>
 
-<video autoplay width="320" height="240" src="/test.mp4"></video>
 
 <!--<button onclick="goFullscreen()">fullscreen</button>-->
 
+<script src ="/socket.io/socket.io.js"></script>
 <script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
-
-<script>
-    //can also be directly called later by specifically target a video element by its id
-    var vp = new VideoPlayer({video: document.getElementById('test'), io: window.io, namespace: '/ten'});
-</script>
 
 <script>
 
