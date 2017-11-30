@@ -9,10 +9,10 @@ class VideoPlayer {
             this._callback = (err, msg) => {
                 if (err) {
                     //throw err; todo
-                    console.log(`VideoPlayer Error: ${err}`);
+                    console.log(`VideoPlayer Error: ${err} ${this._dataNamespace}`);
                     return;
                 }
-                console.log(`VideoPlayer Message: ${msg}`);
+                console.log(`VideoPlayer Message: ${msg} ${this._dataNamespace}`);
             };
         } else {
             this._callback = callback;
@@ -61,7 +61,7 @@ class VideoPlayer {
     }
 
     _onInit(data) {
-        this._init = new Uint8Array(data);
+        this._init = data;
         this._socket.removeListener('mime', this.onInit);
         this._mediaSource = new window.MediaSource();
         this.mediaSourceError = this._mediaSourceError.bind(this);
