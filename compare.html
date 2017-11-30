@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>player comparison</title>
+</head>
+<body>
+
+<h4>html video player using src</h4>
+<video controls autoplay width="320" height="240" src="/starbucks.mp4"></video>
+
+<h4>media source extensions manually creating mse</h4>
+<video controls width="320" height="240" id="starbucks"></video>
+
+<h4>media source extensions automatically creating mse</h4>
+<video controls width="320" height="240" data-namespace="/starbucks"></video>
+
+<a href="rtsp://131.95.3.162/axis-media/media.3gp">vlc link</a>
+
+<script src="/socket.io/socket.io.js">//must be included before player.js because socket.io is used for transport</script>
+<script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
+<script>
+    //can also be directly called later by specifically target a video element
+    const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: '/starbucks'});
+</script>
+
+</body>
+</html>
