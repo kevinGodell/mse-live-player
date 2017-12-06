@@ -1,7 +1,7 @@
 {
   "name": "mse-live-player",
   "version": "0.0.1",
-  "description": "",
+  "description": "media source extension video player",
   "main": "server.js",
   "scripts": {
     "test": "node server.js",
