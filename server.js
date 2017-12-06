@@ -17,13 +17,13 @@ const database = [
     {
         id: 'one',
         name: 'front porch',
-        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.4"', '-reset_timestamps', '1', 'pipe:1'],
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.4"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']}//for debugging ffmpeg, change loglevel to any correct value other than quiet and it will print to node's stderr since it is marked as inherit
     },
     {
         id: 'two',
         name: 'back door',
-        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.5:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.5"', '-reset_timestamps', '1', 'pipe:1'],
+        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.5:554/user=admin_password=pass_channel=1_stream=0.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.5"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']}
 
     },
@@ -72,7 +72,7 @@ const database = [
     {
         id: 'ten',
         name: 'back hallway',
-        params: ['-loglevel', 'quiet', '-probesize', '8192', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=0.sdp', /*'-an',*/'-c:a', 'libfdk_aac', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '0', 'pipe:1'],
+        params: ['-loglevel', 'quiet', '-probesize', '8192', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=0.sdp', /*'-an',*/'-c:a', 'aac', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '0', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']}
     },
     {
