@@ -1,183 +1,331 @@
 // jshint esversion: 6, globalstrict: true, strict: true, bitwise: true, browser: true, devel: true
+/*global MediaSource*/
+/*global URL*/
+/*global io*/
 'use strict';
 
 class VideoPlayer {
-
     constructor(options, callback) {
-
-        if (typeof callback !== 'function') {
+        if (typeof callback === 'function') {
+            this._callback = callback;
+        } else {
             this._callback = (err, msg) => {
                 if (err) {
-                    //throw err; todo
-                    console.log(`VideoPlayer Error: ${err} ${this._dataNamespace}`);
+                    console.error(`VideoPlayer Error: ${err} ${this._dataNamespace}`);
                     return;
                 }
                 console.log(`VideoPlayer Message: ${msg} ${this._dataNamespace}`);
             };
-        } else {
-            this._callback = callback;
         }
-
         if (!options.video || !(options.video instanceof HTMLVideoElement)) {
             this._callback('"options.video" is not a video element');
             return;
         }
-        this._video = options.video;
-
         if (!options.namespace) {
-            this._callback('missing "options.namespace"');//verify begins with slash and atleast 1 character "/abc" todo
+            this._callback('missing "options.namespace"');
             return;
         }
-        this._dataNamespace = options.namespace;//might be room or namespace of socket todo
-
         if (!options.io || !options.io.hasOwnProperty('Socket')) {
             this._callback('"options.io is not an instance of socket.io');
             return;
         }
-        this._socket = options.io(location.origin + this._dataNamespace, {transports: ['websocket'], forceNew: true});//only supporting socket.io at this point todo
-
-        //have to set socket error handler todo
-
-        //maybe this is ok, not sure about binding to keep scope to "this" but works ok todo
-        //this._onMime = this._onMime.bind(this);
-        this.onMime = this._onMime.bind(this);
-
-        //listen for mime type response from server
-        this._socket.on('mime', this.onMime);
-
-        //send request for mime type to server
-        this._socket.emit('message', 'mime');
-
-        //return this; for chaining calls, what calls??? todo
+        this._video = options.video;
+        this._addVideoEvents();
+        //todo check namespace first, then check socket.io as user has intention to use socket.io
+        this._namespace = options.namespace;//might be room or namespace of socket todo
+        this._io = options.io;
+        //only supporting socket.io at this point todo add support for ws
         return this;
+    }
+
+    start() {
+        this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
+        this._addSocketEvents();
+        return this;
+    }
+
+    stop() {
+        //todo
+    }
+
+    destroy() {
+        //todo
+    }
+    
+    mediaInfo() {
+        let str = `******************\n`;
+        str += `namespace : ${this._dataNamespace}\n`;
+        if (this._video) {
+            str += `video.paused : ${this._video.paused}\nvideo.currentTime : ${this._video.currentTime}\nvideo.src : ${this._video.src}\n`;
+            if (this._sourceBuffer.buffered.length) {
+                str += `buffered.length : ${this._sourceBuffer.buffered.length}\nbuffered.end(0) : ${this._sourceBuffer.buffered.end(0)}\nbuffered.start(0) : ${this._sourceBuffer.buffered.start(0)}\nbuffered size : ${this._sourceBuffer.buffered.end(0) - this._sourceBuffer.buffered.start(0)}\nlag : ${this._sourceBuffer.buffered.end(0) - this._video.currentTime}\n`;
+            }
+        }
+        str += `******************\n`;
+        console.info(str);
+    }
+
+    _cleanUp() {
+        this._callback(null, 'CLEAN UP');
+        if (this._video) {
+            this._removeVideoEvents();
+            this._video.pause();
+            this._video.src = '';
+            this._video.load();
+        }
+        if (this._socket) {
+            this._removeSocketEvents();
+            this._socket.disconnect();
+            delete this._socket;
+        }
+        if (this._mediaSource) {
+            this._removeMediaSourceEvents();
+            if (this._mediaSource.sourceBuffers.length) {
+                this._mediaSource.removeSourceBuffer(this._sourceBuffer);
+            }
+            URL.revokeObjectURL(this._mediaSource);
+            delete this._mediaSource;
+        }
+        if (this._sourceBuffer) {
+            this._removeSourceBufferEvents();
+            if (this._sourceBuffer.updating) {
+                this._sourceBuffer.abort();
+            }
+            delete this._sourceBuffer;
+        }
+    }
+
+    ///////////////////// video element events /////////////////////////
+
+    _onVideoError(event) {
+        this._callback(`video ${event.type}`);
+    }
+
+    _addVideoEvents() {
+        if (!this._video) {
+            return;
+        }
+        this.onVideoError = this._onVideoError.bind(this);
+        this._video.addEventListener('error', this.onVideoError, {capture: true, passive: true, once: true});
+    }
+
+    _removeVideoEvents() {
+        if (!this._video) {
+            return;
+        }
+        this._video.removeEventListener('error', this.onVideoError, {capture: true, passive: true, once: true});
+        delete this.onVideoError;
+    }
+
+    ///////////////////// media source events ///////////////////////////
+
+    _onMediaSourceClose(event) {
+        this._callback(null, `media source close ${event.type}`);
+    }
+
+    _onMediaSourceOpen(event) {
+        //this._callback(null, `media source open ${event.type}`);
+        this._mediaSource.duration = Number.POSITIVE_INFINITY;
+        this._sourceBuffer = this._mediaSource.addSourceBuffer(this._mime);
+        this._sourceBuffer.mode = 'sequence';
+        this._addSourceBufferEvents();
+        this._sourceBuffer.appendBuffer(this._init);
+        //this._video.setAttribute('poster', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjY0MiIgaGVpZ2h0PSIzNiIgZmlsbD0ibm9uZSIvPjwvZz48Zz48dGV4dCBmaWxsPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAiIHg9IjE2MCIgeT0iMjYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0cm9rZT0iIzAwMCI+cmVxdWVzdGluZyBtZWRpYSBzZWdtZW50czwvdGV4dD48L2c+PC9zdmc+');
+        this.onSegment = this._onSegment.bind(this);
+        this._socket.addEventListener('segment', this.onSegment, {capture: true, passive: true, once: false});
+        this._socket.send('segments');
+        //this._video.muted = true;
+        this._video.play()
+            .then(() => {
+                //this._callback(null, 'play promise fulfilled');
+                //todo remove "click to play" poster
+            })
+            .catch((error) => {
+                this._callback(error);
+                //todo add "click to play" poster
+            });
+    }
+
+    _addMediaSourceEvents() {
+        if (!this._mediaSource) {
+            return;
+        }
+        this.onMediaSourceClose = this._onMediaSourceClose.bind(this);
+        this._mediaSource.addEventListener('sourceclose', this.onMediaSourceClose, {capture: true, passive: true, once: true});
+        this.onMediaSourceOpen = this._onMediaSourceOpen.bind(this);
+        this._mediaSource.addEventListener('sourceopen', this.onMediaSourceOpen, {capture: true, passive: true, once: true});
+    }
+
+    _removeMediaSourceEvents() {
+        if (!this._mediaSource) {
+            return;
+        }
+        this._mediaSource.removeEventListener('sourceclose', this.onMediaSourceClose, {capture: true, passive: true, once: true});
+        delete this.onMediaSourceClose;
+        this._mediaSource.removeEventListener('sourceopen', this.onMediaSourceOpen, {capture: true, passive: true, once: true});
+        delete this.onMediaSourceOpen;
+    }
+
+    ///////////////////// source buffer events /////////////////////////
+    
+    _onSourceBufferError(event) {
+        this._callback(`sourceBufferError ${event.type}`);
+    }
+
+    _onSourceBufferUpdateEnd(event) {
+        //cant do anything to sourceBuffer if it is updating
+        if (this._sourceBuffer.updating) {
+            return;
+        }
+        //if has last segment pending, append it
+        if (this._lastSegment) {
+            //this._callback(null, 'using this._lastSegment');
+            this._sourceBuffer.appendBuffer(this._lastSegment);
+            delete this._lastSegment;
+            return;
+        }
+        //check if buffered media exists
+        if (!this._sourceBuffer.buffered.length) {
+            return;
+        }
+        const currentTime = this._video.currentTime;
+        const start = this._sourceBuffer.buffered.start(0);
+        const end = this._sourceBuffer.buffered.end(0);
+        const past = currentTime - start;
+        //todo play with numbers and make dynamic or user configurable
+        if (past > 20 && currentTime < end) {
+            this._sourceBuffer.remove(start, currentTime - 4);
+        }
+    }
+
+    _addSourceBufferEvents() {
+        if(!this._sourceBuffer) {
+            return;
+        }
+        this.onSourceBufferError = this._onSourceBufferError.bind(this);
+        this._sourceBuffer.addEventListener('error', this.onSourceBufferError, {capture: true, passive: true, once: true});
+        this.onSourceBufferUpdateEnd = this._onSourceBufferUpdateEnd.bind(this);
+        this._sourceBuffer.addEventListener('updateend', this.onSourceBufferUpdateEnd, {capture: true, passive: true, once: false});
+    }
+
+    _removeSourceBufferEvents() {
+        if(!this._sourceBuffer) {
+            return;
+        }
+        this._sourceBuffer.removeEventListener('error', this.onSourceBufferError, {capture: true, passive: true, once: true});
+        delete this.onSourceBufferError;
+        this._sourceBuffer.removeEventListener('updateend', this.onSourceBufferUpdateEnd, {capture: true, passive: true, once: false});
+        delete this.onSourceBufferUpdateEnd;
+    }
+
+
+    ///////////////////// socket.io events //////////////////////////////
+    
+    _onSocketConnect(event) {
+        //this._callback(null, 'socket connect');
+        //this._video.setAttribute('poster', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjY0MiIgaGVpZ2h0PSIzNiIgZmlsbD0ibm9uZSIvPjwvZz48Zz48dGV4dCBmaWxsPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAiIHg9IjE5NiIgeT0iMjYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0cm9rZT0iIzAwMCI+cmVxdWVzdGluZyBtaW1lIHR5cGU8L3RleHQ+PC9nPjwvc3ZnPg==');
+        this.onMime = this._onMime.bind(this);
+        this._socket.addEventListener('mime', this.onMime, {capture: true, passive: true, once: true});
+        this._socket.send('mime');
+    }
+    
+    _onSocketDisconnect(event) {
+        this._callback(`socket disconnect "${event}"`);
+        this._cleanUp();
+    }
+    
+    _onSocketError(event) {
+        this._callback(`socket error "${event}"`);
+        this._cleanUp();
     }
 
     _onMime(data) {
         this._mime = data;
-        this._socket.removeListener('mime', this.onMime);
+        if (!MediaSource.isTypeSupported(this._mime)) {
+            this._video.setAttribute('poster', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjY0MiIgaGVpZ2h0PSIzNiIgZmlsbD0ibm9uZSIvPjwvZz48Zz48dGV4dCBmaWxsPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAiIHg9IjE3NyIgeT0iMjYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0cm9rZT0iIzAwMCI+bWltZSB0eXBlIG5vdCBzdXBwb3J0ZWQ8L3RleHQ+PC9nPjwvc3ZnPg==');
+            this._callback(`unsupported mime "${this._mime}"`);
+            return;
+        }
+        //this._video.setAttribute('poster', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjY0MiIgaGVpZ2h0PSIzNiIgZmlsbD0ibm9uZSIvPjwvZz48Zz48dGV4dCBmaWxsPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAiIHg9IjE4NiIgeT0iMjYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0cm9rZT0iIzAwMCI+cmVxdWVzdGluZyBpbml0IHNlZ21lbnQ8L3RleHQ+PC9nPjwvc3ZnPg==');
         this.onInit = this._onInit.bind(this);
-        this._socket.on('init', this.onInit);
-        this._socket.emit('message', 'init');
+        this._socket.addEventListener('init', this.onInit, {capture: true, passive: true, once: true});
+        this._socket.send('init');
     }
 
     _onInit(data) {
         this._init = data;
-        this._socket.removeListener('mime', this.onInit);
-        this._mediaSource = new window.MediaSource();
-        this.mediaSourceError = this._mediaSourceError.bind(this);
-        this.mediaSourceOpen = this._mediaSourceOpen.bind(this);
-        this.mediaSourceClose = this._mediaSourceClose.bind(this);
-        this.mediaSourceEnded = this._mediaSourceEnded.bind(this);
-        this._mediaSource.addEventListener('error', this.mediaSourceError);
-        this._mediaSource.addEventListener('sourceopen', this.mediaSourceOpen);
-        this._mediaSource.addEventListener('sourceclose', this.mediaSourceClose);
-        this._mediaSource.addEventListener('sourcended', this.mediaSourceEnded);
-        this._video.src = window.URL.createObjectURL(this._mediaSource);
+        this._mediaSource = new MediaSource();
+        this._addMediaSourceEvents();
+        this._video.src = URL.createObjectURL(this._mediaSource);
     }
 
     _onSegment(data) {
-        //const segment = data;//new Uint8Array(data);
-        //console.log('segment length ' + segment.length);
-        //check if sourceBuffer is busy, then add to buffer queue todo
+        if (this._sourceBuffer.buffered.length) {
+            const lag = this._sourceBuffer.buffered.end(0) - this._video.currentTime;
+            if (lag > 1) {
+                this._video.currentTime = this._sourceBuffer.buffered.end(0) - 1;
+            }
+        }
         if (this._sourceBuffer.updating) {
-            this._callback(null, 'source buffer updating');
-            //never store more than the most recent segment received because we are trying to stay as close to realtime as possible
             this._lastSegment = data;
         } else {
-            //this._lastSegment = undefined;
             delete this._lastSegment;
             this._sourceBuffer.appendBuffer(data);
-
         }
-        //else, let the data drop
     }
 
-    _mediaSourceError(error) {
-        alert('error ' + error);
-        alert(this instanceof VideoPlayer);
-    }
-
-    _mediaSourceOpen(event) {
-        //alert('sourceopen ' + event);
-        //alert(this instanceof VideoPlayer);
-        this._sourceBuffer = this._mediaSource.addSourceBuffer(this._mime);
-        this._sourceBuffer.mode = 'sequence';
-        this.sourceBufferUpdate = this._sourceBufferUpdate.bind(this);
-        this._sourceBuffer.addEventListener('update', this.sourceBufferUpdate);
-        this.sourceBufferUpdateEnd = this._sourceBufferUpdateEnd.bind(this);
-        this._sourceBuffer.addEventListener('updateend', this.sourceBufferUpdateEnd);
-        this._sourceBuffer.appendBuffer(this._init);
-        this.onSegment = this._onSegment.bind(this);
-        this._socket.on('segment', this.onSegment);
-        this._socket.emit('message', 'segment');
-        this._video.play();
-        //todo will add custom controls
-        //this._video.addEventListener('pause', (event) => {
-        //event.preventDefault();
-        //alert(event);
-        //this._video.play();
-        //});
-    }
-
-    _mediaSourceClose(event) {
-        alert('sourceclose ' + event);
-        alert(this instanceof VideoPlayer);
-    }
-
-    _mediaSourceEnded(event) {
-        alert('sourceended ' + event);
-        alert(this instanceof VideoPlayer);
-    }
-
-    _sourceBufferUpdate(event) {
-        //alert('update ' + event);
-        //alert(this instanceof VideoPlayer);
-    }
-
-    _sourceBufferUpdateEnd(event) {
-
-        //fix for safari to get video playing
-        if (this._mediaSource.duration !== Number.POSITIVE_INFINITY && this._video.currentTime === 0 && this._mediaSource.duration > 0) {
-            this._video.currentTime = this._mediaSource.duration - 1;
-            this._mediaSource.duration = Number.POSITIVE_INFINITY;
+    _addSocketEvents() {
+        if (!this._socket) {
+            return;
         }
+        this.onSocketConnect = this._onSocketConnect.bind(this);
+        this._socket.addEventListener('connect', this.onSocketConnect, {capture: true, passive: true, once: true});
+        this.onSocketDisconnect = this._onSocketDisconnect.bind(this);
+        this._socket.addEventListener('disconnect', this.onSocketDisconnect, {capture: true, passive: true, once: true});
+        this.onSocketError = this._onSocketError.bind(this);
+        this._socket.addEventListener('error', this.onSocketError, {capture: true, passive: true, once: true});
+    }
 
-        //we have a pending segment that arrived while this._sourceBuffer.updating === true
-        if (this._lastSegment) {
-            this._callback(null, 'using this._lastSegment');
-            this._sourceBuffer.appendBuffer(this._lastSegment);
-            delete this._lastSegment;
+    _removeSocketEvents() {
+        if (!this._socket) {
+            return;
         }
-
-        //todo add buffer queue here if new segment arrived before old segment added to buffer triggering update end
+        this._socket.removeEventListener('connect', this.onSocketConnect, {capture: true, passive: true, once: true});
+        delete this.onSocketConnect;
+        this._socket.removeEventListener('disconnect', this.onSocketDisconnect, {capture: true, passive: true, once: true});
+        delete this.onSocketDisconnect;
+        this._socket.removeEventListener('error', this.onSocketError, {capture: true, passive: true, once: true});
+        delete this.onSocketError;
+        this._socket.removeEventListener('mime', this.onMime, {capture: true, passive: true, once: true});
+        delete this.onMime;
+        this._socket.removeEventListener('init', this.onInit, {capture: true, passive: true, once: true});
+        delete this.onInit;
+        this._socket.removeEventListener('segments', this.onSegment, {capture: true, passive: true, once: false});
+        delete this.onSegment;
     }
 
 }
 
 (function () {
-    
+
     if (!('io' in window)) {
-        alert('socket.io was not found');
-        return;
+        throw new Error('socket.io was not found');
+        //return;
     }
-    
+
     //get all video elements on page
     const videos = document.getElementsByTagName('video');
 
-    //array to keep reference to newly created VideoPlayers
+    //array to keep reference to newly created VideoPlayers, maybe could be a keyed object
     const videoPlayers = [];
 
     for (let i = 0; i < videos.length; i++) {
-        if (videos[i].hasAttribute('data-namespace')) {//only grab video elements that deliberately have data-namespace attribute
-            videoPlayers.push(new VideoPlayer({
-                video: videos[i],
-                io: window.io,
-                namespace: videos[i].getAttribute('data-namespace')
-            }));
+        const video = videos[i];
+        //only grab video elements that deliberately have data-namespace attribute
+        if (video.dataset.namespace) {
+            videoPlayers.push(new VideoPlayer({video: video, io: io, namespace: video.dataset.namespace}).start());
         }
     }
-
-    //add some listeners to video element to pass commands into mse
 
 })();
 
@@ -189,5 +337,5 @@ class VideoPlayer {
 //initiate socket to get information from server
 //first request codec string to test against browser and then feed first into source
 //then request init-segment to feed
-//then request segments until we run into pause, stop, close, error, buffer not ready, etc
+//then request media segments until we run into pause, stop, close, error, buffer not ready, etc
 //change poster on video element based on current status, error, not ready, etc
