@@ -3,25 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <title>player comparison</title>
+    <link href='/public/player.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
 
-<h4>html video player using src</h4>
-<video controls autoplay width="320" height="240" src="/starbucks.mp4"></video>
+<div>
+    <h4>video player using progressive mp4</h4>
+    <video autoplay width="320" height="240" class="mse" src="/starbucks.mp4"></video>
+</div>
 
-<h4>create media source extensions manually</h4>
-<video controls width="320" height="240" id="starbucks"></video>
+<div>
+    <h4>media source extensions manual</h4>
+    <video width="320" height="240" class="mse" id="starbucks"></video>
+</div>
 
-<h4>create media source extensions automatically</h4>
-<video controls width="320" height="240" data-namespace="/starbucks"></video>
+<div>
+    <h4>media source extensions automatic</h4>
+    <video width="320" height="240" class="mse" data-namespace="starbucks"></video>
+</div>
 
-<a href="rtsp://131.95.3.162/axis-media/media.3gp">vlc link</a>
+<div>
+    <a href="rtsp://131.95.3.162:554/axis-media/media.3gp">vlc link</a>
+    <a href="/starbucks.mp4">src link</a>
+</div>
+
+<hr style="clear: both;"/>
+
+<div>
+    <h4>video player using progressive mp4</h4>
+    <video autoplay width="320" height="240" class="mse" src="pool.mp4"></video>
+</div>
+
+<div>
+    <h4>media source extensions manual</h4>
+    <video width="320" height="240" class="mse" id="pool"></video>
+</div>
+
+<div>
+    <h4>media source extensions automatic</h4>
+    <video width="320" height="240" class="mse" data-namespace="pool"></video>
+</div>
+
+<div>
+    <a href="rtsp://216.4.116.29:554/axis-media/media.3gp">vlc link</a>
+    <a href="/pool.mp4">src link</a>
+</div>
 
 <script src="/socket.io/socket.io.js">//must be included before player.js because socket.io is used for transport</script>
 <script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
 <script>
-    //can also be directly called later by specifically target a video element
-    const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: '/starbucks'});
+    //can also be directly called later by specifically targeting a video element
+    const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: 'starbucks'}).start();
+    const vp2 = new VideoPlayer({video: document.getElementById('pool'), io: io, namespace: 'pool'}).start();
 </script>
 
 </body>

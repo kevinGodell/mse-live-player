@@ -16,8 +16,14 @@ const Mp4Segmenter = new require('./Mp4Segmenter');
 const database = [
     {
         id: 'starbucks',
-        name: 'starbucks coffee sucks',
-        params: ['-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0', '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
+        name: 'starbucks coffee',
+        params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
+        options: {stdio : ['ignore', 'pipe', 'ignore']}
+    },
+    {
+        id: 'pool',
+        name: 'resort pool',
+        params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://216.4.116.29:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']}
     }
 ];
@@ -45,7 +51,6 @@ for (let i = 0; i < database.length; i++) {
         .on('connection', (socket) => {//listen for connection to /namespace
             console.log(`a user connected to namespace "/${database[i].id}"`);
 
-
             //event listener
             const onInit = () => {
                 socket.emit('mime', mp4segmenter.mimeType);
@@ -61,6 +66,7 @@ for (let i = 0; i < database.length; i++) {
             //client request
             const mime = () => {
                 if (mp4segmenter.mimeType) {
+                    console.log(database[i].id, mp4segmenter.mimeType);
                     socket.emit('mime', mp4segmenter.mimeType);
                 } else {
                     mp4segmenter.on('init', onInit);
@@ -73,9 +79,17 @@ for (let i = 0; i < database.length; i++) {
             };
 
             //client request
-            const segment = () => {
+            const segments = () => {
                 //add listener for segments being dispatched by mp4segmenter
                 mp4segmenter.on('segment', onSegment);
+            };
+
+            const segment = () => {
+                if (mp4segmenter.lastSegment) {
+                    socket.emit('segment', mp4segmenter.lastSegment);
+                } else {
+                    mp4segmenter.once('segment', onSegment);
+                }
             };
 
             //client request
@@ -106,8 +120,11 @@ for (let i = 0; i < database.length; i++) {
                     case 'init' ://client is requesting init segment
                         init();
                         break;
-                    case 'segment' ://client is requesting segments
+                    case 'segment' ://client is requesting a single segment
                         segment();
+                        break;
+                    case 'segments' ://client is requesting all segments
+                        segments();
                         break;
                     case 'pause' :
                         pause();
@@ -139,6 +156,10 @@ app.get('/public/player.js', (req, res) => {
     res.sendFile(__dirname + '/public/player.js');
 });
 
+app.get('/public/player.css', (req, res) => {
+    res.sendFile(__dirname + '/public/player.css');
+});
+
 app.get('/starbucks.mp4', (req, res) => {
     if (!streams.starbucks.mp4segmenter.initSegment) {
         //browser may have requested init segment before it was ready
@@ -154,8 +175,21 @@ app.get('/starbucks.mp4', (req, res) => {
     }
 });
 
+app.get('/pool.mp4', (req, res) => {
+    if (!streams.pool.mp4segmenter.initSegment) {
+        //browser may have requested init segment before it was ready
+        res.status(503);
+        res.end('resource not ready');
+    } else {
+        res.status(200);
+        res.write(streams.pool.mp4segmenter.initSegment);
+        streams.pool.mp4segmenter.pipe(res);
+        res.on('close', () => {
+            streams.pool.mp4segmenter.unpipe(res);
+        });
+    }
+});
+
 http.listen(3000, () => {
     console.log('listening on localhost:3000');
 });
-
-//rtsp://131.95.3.162/axis-media/media.3gp
