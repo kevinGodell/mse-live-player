@@ -58,3 +58,5 @@ typings/
 .env
 
 .idea/
+server.bat
+mse-live-player.iml
