@@ -10,33 +10,31 @@ class Mp4Segmenter extends Transform {
             this._callback = callback;
         }
         this._parseChunk = this._findFtyp;
-        this._foundSegment = false;
     }
     
     get mimeType() {
-        if (this._mimeType) {
-            return this._mimeType;
-        } else {
-            return null;
-        }
+        return this._mimeType || null;
     }
 
     get initSegment() {
-        if (this._initSegment) {
-            return this._initSegment;
-        } else {
-            return null;
-            //throw new Error('init segment not created yet');
-        }
+        return this._initSegment || null;
+    }
+    
+    get lastSegment() {
+        return this._lastSegment || null;
+    }
+    
+    get lastTimestamp() {
+        return this._lastTimestamp || null;
     }
 
     _findFtyp(chunk) {
         //console.log('findFtyp');
-        if (chunk[4] !== 0x66 || chunk[5] !== 0x74 || chunk[6] !== 0x79 || chunk[7] !== 0x70) {
+        const chunkLength = chunk.length;
+        if (chunkLength < 8 || chunk[4] !== 0x66 || chunk[5] !== 0x74 || chunk[6] !== 0x79 || chunk[7] !== 0x70) {
             throw new Error('cannot find ftyp');
         }
-        const chunkLength = chunk.length;
-        this._ftypLength = chunk.readUIntBE(0, 4);
+        this._ftypLength = chunk.readUInt32BE(0, true);
         if (this._ftypLength < chunk.length) {
             this._ftyp = chunk.slice(0, this._ftypLength);
             this._parseChunk = this._findMoov;
@@ -52,11 +50,11 @@ class Mp4Segmenter extends Transform {
 
     _findMoov(chunk) {
         //console.log('findMoov');
-        if (chunk[4] !== 0x6D || chunk[5] !== 0x6F || chunk[6] !== 0x6F || chunk[7] !== 0x76) {
+        const chunkLength = chunk.length;
+        if (chunkLength < 8 || chunk[4] !== 0x6D || chunk[5] !== 0x6F || chunk[6] !== 0x6F || chunk[7] !== 0x76) {
             throw new Error('cannot find moov');
         }
-        const chunkLength = chunk.length;
-        const moovLength = chunk.readUIntBE(0, 4);
+        const moovLength = chunk.readUInt32BE(0, true);
         if (moovLength < chunkLength) {
             //console.log('moovLength < chunk.length');
             this._parseMoov(Buffer.concat([this._ftyp, chunk], (this._ftypLength + moovLength)));
@@ -71,7 +69,7 @@ class Mp4Segmenter extends Transform {
             delete this._ftypLength;
             this._parseChunk = this._findMoof;
         } else {
-            //should not be possible to get here
+            //probably should not get here
             //if we do, will have to store chunk until size is big enough to have entire moov piece
             throw new Error('moovLength greater than chunkLength');
         }
@@ -85,35 +83,36 @@ class Mp4Segmenter extends Transform {
         }
         const index = this._initSegment.indexOf('avcC') + 5;
         if (index === -1) {
-            throw new Error('header does not contain codec information');
+            throw new Error('moov does not contain codec information');
         }
         this._mimeType = `video/mp4; codecs="avc1.${this._initSegment.slice(index , index + 3).toString('hex').toUpperCase()}${audioString}"`;
-        console.log(this._mimeType);
-        console.log('init segment ready');
         this.emit('init');
+    }
+
+    _moofHunt(chunk) {
+        const index = chunk.indexOf('moof');
+        if (index > 3) {
+            this._parseChunk = this._findMoof;
+            this._parseChunk(chunk.slice(index - 4));
+        }
     }
     
     _findMoof(chunk) {
         //console.log('findMoof');
-        if (chunk[4] !== 0x6D || chunk[5] !== 0x6F || chunk[6] !== 0x6F || chunk[7] !== 0x66) {
+        const chunkLength = chunk.length;
+        if (chunkLength < 8 || chunk[4] !== 0x6D || chunk[5] !== 0x6F || chunk[6] !== 0x6F || chunk[7] !== 0x66) {
             //did not previously parse a complete segment
-            if (this._foundSegment === false) {
+            if (!this._lastSegment) {
                 console.log(chunk.slice(0, 20).toString());
                 throw new Error('immediately failed to find moof');
             } else {
                 //have to do a string search for moof or mdat and start loop again,
                 //sometimes ffmpeg gets a blast of data and sends it through corrupt
-                if (chunk.toString().indexOf('moof') !== 1) {
-                    console.log('found moof at ', chunk.toString().indexOf('moof'));
-                }
-                if (chunk.toString().indexOf('mdat') !== 1) {
-                    console.log('found mdat at ', chunk.toString().indexOf('mdat'));
-                }
-                throw new Error('failed to find moof after already running good');
+                this._parseChunk = this._moofHunt;
+                this._parseChunk(chunk);
             }
         }
-        const chunkLength = chunk.length;
-        this._moofLength = chunk.readUIntBE(0, 4);
+        this._moofLength = chunk.readUInt32BE(0, true);
         if (this._moofLength < chunkLength) {
             //console.log('moofLength < chunkLength');
             this._moof = chunk.slice(0, this._moofLength);
@@ -135,28 +134,28 @@ class Mp4Segmenter extends Transform {
             this._mdatBuffer.push(chunk);
             this._mdatBufferSize += chunk.length;
             if (this._mdatLength === this._mdatBufferSize) {
-                this._foundSegment = true;
                 //console.log('mdatLength === mdatBufferSize');
-                const data = Buffer.concat([this._moof, ...this._mdatBuffer], (this._moofLength + this._mdatLength));
+                this._lastSegment = Buffer.concat([this._moof, ...this._mdatBuffer], (this._moofLength + this._mdatLength));
+                this._lastTimestamp = Date.now();
                 delete this._moof;
                 delete this._mdatBuffer;
                 delete this._moofLength;
                 delete this._mdatLength;
                 delete this._mdatBufferSize;
                 if (this._readableState.pipesCount > 0) {
-                    this.push(data);
+                    this.push(this._lastSegment);
                 }
                 if (this._callback) {
-                    this._callback(data);
+                    this._callback(this._lastSegment);
                 }
                 if (this.listenerCount('segment') > 0) {
-                    this.emit('segment', data);
+                    this.emit('segment', this._lastSegment);
                 }
                 this._parseChunk = this._findMoof;
             } else if (this._mdatLength < this._mdatBufferSize) {
-                this._foundSegment = true;
                 //console.log('mdatLength', this._mdatLength, '<', 'mdatBufferSize', this._mdatBufferSize);
-                const data = Buffer.concat([this._moof, ...this._mdatBuffer], (this._moofLength + this._mdatLength));
+                this._lastSegment = Buffer.concat([this._moof, ...this._mdatBuffer], (this._moofLength + this._mdatLength));
+                this._lastTimestamp = Date.now();
                 const sliceIndex = this._mdatBufferSize - this._mdatLength;
                 delete this._moof;
                 delete this._mdatBuffer;
@@ -164,13 +163,13 @@ class Mp4Segmenter extends Transform {
                 delete this._mdatLength;
                 delete this._mdatBufferSize;
                 if (this._readableState.pipesCount > 0) {
-                    this.push(data);
+                    this.push(this._lastSegment);
                 }
                 if (this._callback) {
-                    this._callback(data);
+                    this._callback(this._lastSegment);
                 }
                 if (this.listenerCount('segment') > 0) {
-                    this.emit('segment', data);
+                    this.emit('segment', this._lastSegment);
                 }
                 this._parseChunk = this._findMoof;
                 this._parseChunk(chunk.slice(sliceIndex));
@@ -178,30 +177,30 @@ class Mp4Segmenter extends Transform {
         } else {
             //console.log('mdat first pass');
             //first pass to ensure start of mdat and get its size, most likely chunk will not contain entire mdat
-            if (chunk[4] !== 0x6D || chunk[5] !== 0x64 || chunk[6] !== 0x61 || chunk[7] !== 0x74) {
+            const chunkLength = chunk.length;
+            if (chunkLength < 8 || chunk[4] !== 0x6D || chunk[5] !== 0x64 || chunk[6] !== 0x61 || chunk[7] !== 0x74) {
                 console.log(chunk.slice(0, 20).toString());
                 throw new Error('cannot find mdat');
             }
-            const chunkLength = chunk.length;
-            this._mdatLength = chunk.readUIntBE(0, 4);
+            this._mdatLength = chunk.readUInt32BE(0, true);
             if (this._mdatLength > chunkLength) {
                 //todo almost 100% guaranteed to exceed size of single chunk
                 this._mdatBuffer = [chunk];
                 this._mdatBufferSize = chunkLength;
             } else if (this._mdatLength === chunkLength) {
-                this._foundSegment = true;
-                const data = Buffer.concat([this._moof, chunk], (this._moofLength + chunkLength));
+                this._lastSegment = Buffer.concat([this._moof, chunk], (this._moofLength + chunkLength));
+                this._lastTimestamp = Date.now();
                 delete this._moof;
                 delete this._moofLength;
                 delete this._mdatLength;
                 if (this._readableState.pipesCount > 0) {
-                    this.push(data);
+                    this.push(this._lastSegment);
                 }
                 if (this._callback) {
-                    this._callback(data);
+                    this._callback(this._lastSegment);
                 }
                 if (this.listenerCount('segment') > 0) {
-                    this.emit('segment', data);
+                    this.emit('segment', this._lastSegment);
                 }
                 this._parseChunk = this._findMoof;
             } else {
@@ -218,6 +217,8 @@ class Mp4Segmenter extends Transform {
 
     _flush(callback) {
         this._parseChunk = this._findFtyp;
+        delete this._lastSegment;
+        delete this._lastTimestamp;
         callback();
     }
 }
