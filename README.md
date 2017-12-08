@@ -1,6 +1,18 @@
 # mse-live-player
 
-setup node modules
+install files with git
+
+```
+git clone https://github.com/kevinGodell/mse-live-player.git
+```
+
+move into directory
+
+```
+cd mse-live-player
+```
+
+install node module dependencies
 
 ```
 npm install
