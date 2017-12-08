@@ -135,7 +135,13 @@ class VideoPlayer {
         this._socket.addEventListener('segment', this.onSegment, {capture: true, passive: true, once: false});
         this._socket.send('segments');
         //this._video.muted = true;
-        this._video.play()
+        try {
+            this._video.play();
+        }
+        catch(error) {
+            this._callback(error);
+        }
+        /*this._video.play()
             .then(() => {
                 //this._callback(null, 'play promise fulfilled');
                 //todo remove "click to play" poster
@@ -143,7 +149,7 @@ class VideoPlayer {
             .catch((error) => {
                 this._callback(error);
                 //todo add "click to play" poster
-            });
+            });*/
     }
 
     _addMediaSourceEvents() {
