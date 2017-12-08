@@ -135,21 +135,20 @@ class VideoPlayer {
         this._socket.addEventListener('segment', this.onSegment, {capture: true, passive: true, once: false});
         this._socket.send('segments');
         //this._video.muted = true;
-        try {
+        if ('Promise' in window) {
+            this._video.play()
+                .then(() => {
+                    //this._callback(null, 'play promise fulfilled');
+                    //todo remove "click to play" poster
+                })
+                .catch((error) => {
+                    this._callback(error);
+                    //todo add "click to play" poster
+                });
+        } else {
             this._video.play();
         }
-        catch(error) {
-            this._callback(error);
-        }
-        /*this._video.play()
-            .then(() => {
-                //this._callback(null, 'play promise fulfilled');
-                //todo remove "click to play" poster
-            })
-            .catch((error) => {
-                this._callback(error);
-                //todo add "click to play" poster
-            });*/
+
     }
 
     _addMediaSourceEvents() {
