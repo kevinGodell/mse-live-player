@@ -156,6 +156,10 @@ app.get('/public/player.js', (req, res) => {
     res.sendFile(__dirname + '/public/player.js');
 });
 
+app.get('/public/player.min.js', (req, res) => {
+    res.sendFile(__dirname + '/public/player.min.js');
+});
+
 app.get('/public/player.css', (req, res) => {
     res.sendFile(__dirname + '/public/player.css');
 });

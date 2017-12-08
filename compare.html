@@ -50,7 +50,7 @@
 </div>
 
 <script src="/socket.io/socket.io.js">//must be included before player.js because socket.io is used for transport</script>
-<script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
+<script src="/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
 <script>
     //can also be directly called later by specifically targeting a video element
     const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: 'starbucks'}).start();
