@@ -35,11 +35,11 @@ class Mp4Segmenter extends Transform {
             throw new Error('cannot find ftyp');
         }
         this._ftypLength = chunk.readUInt32BE(0, true);
-        if (this._ftypLength < chunk.length) {
+        if (this._ftypLength < chunkLength) {
             this._ftyp = chunk.slice(0, this._ftypLength);
             this._parseChunk = this._findMoov;
             this._parseChunk(chunk.slice(this._ftypLength));
-        } else if (this._ftypLength === chunk.length) {
+        } else if (this._ftypLength === chunkLength) {
             this._ftyp = chunk;
             this._parseChunk = this._findMoov;
         } else {
@@ -81,10 +81,11 @@ class Mp4Segmenter extends Transform {
         if (this._initSegment.indexOf('mp4a') !== -1) {
             audioString = ', mp4a.40.2';
         }
-        const index = this._initSegment.indexOf('avcC') + 5;
+        let index = this._initSegment.indexOf('avcC');
         if (index === -1) {
             throw new Error('moov does not contain codec information');
         }
+        index += 5;
         this._mimeType = `video/mp4; codecs="avc1.${this._initSegment.slice(index , index + 3).toString('hex').toUpperCase()}${audioString}"`;
         this.emit('init');
     }
