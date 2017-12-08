@@ -11,10 +11,10 @@ class VideoPlayer {
         } else {
             this._callback = (err, msg) => {
                 if (err) {
-                    console.error(`VideoPlayer Error: ${err} ${this._dataNamespace}`);
+                    console.error(`VideoPlayer Error: ${err} ${this._namespace}`);
                     return;
                 }
-                console.log(`VideoPlayer Message: ${msg} ${this._dataNamespace}`);
+                console.log(`VideoPlayer Message: ${msg} ${this._namespace}`);
             };
         }
         if (!options.video || !(options.video instanceof HTMLVideoElement)) {
@@ -54,7 +54,7 @@ class VideoPlayer {
     
     mediaInfo() {
         let str = `******************\n`;
-        str += `namespace : ${this._dataNamespace}\n`;
+        str += `namespace : ${this._namespace}\n`;
         if (this._video) {
             str += `video.paused : ${this._video.paused}\nvideo.currentTime : ${this._video.currentTime}\nvideo.src : ${this._video.src}\n`;
             if (this._sourceBuffer.buffered.length) {
