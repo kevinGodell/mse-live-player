@@ -10,7 +10,7 @@ const io = require('socket.io')(http/*, {origins: allowedOrigins}*/);
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = new require('./Mp4Segmenter');
+const Mp4Segmenter = require('./Mp4Segmenter');
 
 //simulated data pulled from db, will add sqlite later todo
 const database = [
@@ -31,7 +31,7 @@ const database = [
 const streams = {};
 
 for (let i = 0; i < database.length; i++) {
-    //create new mp4 segmenter that will head codec, init, and segments from data pipe from ffmpeg
+    //create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
     const mp4segmenter = new Mp4Segmenter();
     //spawn ffmpeg with stream info and pipe to mp4segmenter
     const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
@@ -46,15 +46,17 @@ for (let i = 0; i < database.length; i++) {
     streams[database[i].id] = {ffmpeg: ffmpeg, mp4segmenter: mp4segmenter};
 
     //generate the /namespaces for io to route video streams
+    const namespace = `/${database[i].id}`;
+
     io
-        .of(`/${database[i].id}`)//accessing "/namespace" of io based on id of stream
+        .of(namespace)//accessing "/namespace" of io based on id of stream
         .on('connection', (socket) => {//listen for connection to /namespace
-            console.log(`a user connected to namespace "/${database[i].id}"`);
+            console.log(`a user connected to namespace "${namespace}"`);
 
             //event listener
-            const onInit = () => {
-                socket.emit('mime', mp4segmenter.mimeType);
-                mp4segmenter.removeListener('ready', onInit);
+            const onInitialized = () => {
+                socket.emit('mime', mp4segmenter.mime);
+                mp4segmenter.removeListener('initialized', onInitialized);
             };
 
             //event listener
@@ -64,83 +66,88 @@ for (let i = 0; i < database.length; i++) {
             };
 
             //client request
-            const mime = () => {
-                if (mp4segmenter.mimeType) {
-                    console.log(database[i].id, mp4segmenter.mimeType);
-                    socket.emit('mime', mp4segmenter.mimeType);
+            const mimeReq = () => {
+                if (mp4segmenter.mime) {
+                    console.log(`${namespace} : ${mp4segmenter.mime}`);
+                    socket.emit('mime', mp4segmenter.mime);
                 } else {
-                    mp4segmenter.on('init', onInit);
+                    mp4segmenter.on('initialized', onInitialized);
                 }
             };
 
             //client request
-            const init = () => {
-                socket.emit('init', mp4segmenter.initSegment);
+            const initializationReq = () => {
+                socket.emit('initialization', mp4segmenter.initialization);
             };
 
             //client request
-            const segments = () => {
+            const segmentsReq = () => {
+                //send current segment first to start video asap
+                if (mp4segmenter.segment) {
+                    socket.emit('segment', mp4segmenter.segment);
+                }
                 //add listener for segments being dispatched by mp4segmenter
                 mp4segmenter.on('segment', onSegment);
             };
 
-            const segment = () => {
-                if (mp4segmenter.lastSegment) {
-                    socket.emit('segment', mp4segmenter.lastSegment);
+            //client request
+            const segmentReq = () => {
+                if (mp4segmenter.segment) {
+                    socket.emit('segment', mp4segmenter.segment);
                 } else {
                     mp4segmenter.once('segment', onSegment);
                 }
             };
 
             //client request
-            const pause = () => {//same as stop, for now. may need other logic todo
+            const pauseReq = () => {//same as stop, for now. will need other logic todo
                 mp4segmenter.removeListener('segment', onSegment);
             };
 
             //client request
-            const resume = () => {//same as segment, for now. may need other logic todo
+            const resumeReq = () => {//same as segment, for now. will need other logic todo
                 mp4segmenter.on('segment', onSegment);
                 //may indicate that we are resuming from paused
             };
 
             //client request
-            const stop = () => {
+            const stopReq = () => {
                 mp4segmenter.removeListener('segment', onSegment);
-                //may have to remove other listeners if client requests to stop before asking for segments
+                mp4segmenter.removeListener('initialized', onInitialized);
                 //stop might indicate that we will not request anymore data todo
             };
 
             //listen to client messages
             socket.on('message', (msg) => {
-                console.log(msg);
+                console.log(`${namespace} message : ${msg}`);
                 switch (msg) {
                     case 'mime' ://client is requesting mime
-                        mime();
+                        mimeReq();
                         break;
-                    case 'init' ://client is requesting init segment
-                        init();
+                    case 'initialization' ://client is requesting initialization segment
+                        initializationReq();
                         break;
-                    case 'segment' ://client is requesting a single segment
-                        segment();
+                    case 'segment' ://client is requesting a SINGLE segment
+                        segmentReq();
                         break;
-                    case 'segments' ://client is requesting all segments
-                        segments();
+                    case 'segments' ://client is requesting ALL segments
+                        segmentsReq();
                         break;
                     case 'pause' :
-                        pause();
+                        pauseReq();
                         break;
                     case 'resume' :
-                        resume();
+                        resumeReq();
                         break;
                     case 'stop' ://client requesting to stop receiving segments
-                        stop();
+                        stopReq();
                         break;
                 }
             });
 
             socket.on('disconnect', () => {
-                stop();
-                console.log(`A user disconnected from namespace "/${database[i].id}"`);
+                stopReq();
+                console.log(`A user disconnected from namespace "${namespace}"`);
             });
 
         });
@@ -165,13 +172,13 @@ app.get('/public/player.css', (req, res) => {
 });
 
 app.get('/starbucks.mp4', (req, res) => {
-    if (!streams.starbucks.mp4segmenter.initSegment) {
+    if (!streams.starbucks.mp4segmenter.initialization) {
         //browser may have requested init segment before it was ready
         res.status(503);
         res.end('resource not ready');
     } else {
         res.status(200);
-        res.write(streams.starbucks.mp4segmenter.initSegment);
+        res.write(streams.starbucks.mp4segmenter.initialization);
         streams.starbucks.mp4segmenter.pipe(res);
         res.on('close', () => {
             streams.starbucks.mp4segmenter.unpipe(res);
@@ -180,13 +187,13 @@ app.get('/starbucks.mp4', (req, res) => {
 });
 
 app.get('/pool.mp4', (req, res) => {
-    if (!streams.pool.mp4segmenter.initSegment) {
+    if (!streams.pool.mp4segmenter.initialization) {
         //browser may have requested init segment before it was ready
         res.status(503);
         res.end('resource not ready');
     } else {
         res.status(200);
-        res.write(streams.pool.mp4segmenter.initSegment);
+        res.write(streams.pool.mp4segmenter.initialization);
         streams.pool.mp4segmenter.pipe(res);
         res.on('close', () => {
             streams.pool.mp4segmenter.unpipe(res);
