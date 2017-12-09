@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>player comparison</title>
-    <link href='/public/player.css' rel='stylesheet' type='text/css'>
+    <link href='/public/player.css' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 <body>
-
 <div>
     <h4>video player using progressive mp4</h4>
-    <video controls autoplay width="320" height="240" class="mse" src="/starbucks.mp4"></video>
+    <video controls autoplay width="320" height="240" src="/starbucks.mp4"></video>
 </div>
 
 <div>
     <h4>media source extensions manual</h4>
-    <video controls width="320" height="240" class="mse" id="starbucks"></video>
+    <video controls width="320" height="240" id="starbucks"></video>
 </div>
 
 <div>
     <h4>media source extensions automatic</h4>
-    <video controls width="320" height="240" class="mse" data-namespace="starbucks"></video>
+    <video controls width="320" height="240" data-namespace="starbucks" data-controls="startstop|fullscreen"></video>
 </div>
 
 <div>
@@ -31,17 +31,17 @@
 
 <div>
     <h4>video player using progressive mp4</h4>
-    <video controls autoplay width="320" height="240" class="mse" src="pool.mp4"></video>
+    <video controls autoplay width="320" height="240" src="pool.mp4"></video>
 </div>
 
 <div>
     <h4>media source extensions manual</h4>
-    <video controls width="320" height="240" class="mse" id="pool"></video>
+    <video controls width="320" height="240" id="pool"></video>
 </div>
 
 <div>
     <h4>media source extensions automatic</h4>
-    <video controls width="320" height="240" class="mse" data-namespace="pool"></video>
+    <video controls width="320" height="240" data-namespace="pool" data-controls="fullscreen"></video>
 </div>
 
 <div>
@@ -53,8 +53,8 @@
 <script src="/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
 <script>
     //can also be directly called later by specifically targeting a video element
-    const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: 'starbucks'}).start();
-    const vp2 = new VideoPlayer({video: document.getElementById('pool'), io: io, namespace: 'pool'}).start();
+    const vp = new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: 'starbucks', controls: 'fullscreen'}).start();
+    const vp2 = new VideoPlayer({video: document.getElementById('pool'), io: io, namespace: 'pool', controls: 'startstop'}).start();
 </script>
 
 </body>

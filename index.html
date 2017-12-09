@@ -4,59 +4,46 @@
     <meta charset="UTF-8">
     <title>player</title>
     <link href='/public/player.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        video {
+            width: 265px;
+            height: 210px;
+        }
+    </style>
 </head>
 <body>
 
-<video width="320" height="240" class="mse" data-namespace="one"></video>
+<video data-namespace="one" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="two"></video>
+<video data-namespace="two" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="three"></video>
+<video data-namespace="three" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="four"></video>
+<video data-namespace="four" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="five"></video>
+<video data-namespace="five" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="six"></video>
+<video data-namespace="six" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="seven"></video>
+<video data-namespace="seven" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="eight"></video>
+<video data-namespace="eight" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="nine"></video>
+<video data-namespace="nine" data-controls="startstop|fullscreen"></video>
 
-<video muted width="320" height="240" class="mse" data-namespace="ten"></video>
+<video muted data-namespace="ten" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="eleven"></video>
+<video data-namespace="eleven" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="twelve"></video>
+<video data-namespace="twelve" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="thirteen"></video>
+<video data-namespace="thirteen" data-controls="startstop|fullscreen"></video>
 
-<video width="320" height="240" class="mse" data-namespace="fourteen"></video>
-
-<!--<button onclick="goFullscreen()">fullscreen</button>-->
+<video data-namespace="fourteen" data-controls="startstop|fullscreen"></video>
 
 <script src ="/socket.io/socket.io.js"></script>
 <script src="/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
-
-<script>
-
-    /*function goFullscreen() {
-        var i = document.getElementById("one");
-        // go full-screen
-        if (i.requestFullscreen) {
-            i.requestFullscreen();
-        } else if (i.webkitRequestFullscreen) {
-            i.webkitRequestFullscreen();
-        } else if (i.mozRequestFullScreen) {
-            i.mozRequestFullScreen();
-        } else if (i.msRequestFullscreen) {
-            i.msRequestFullscreen();
-        }
-    }*/
-
-</script>
 
 </body>
 </html>

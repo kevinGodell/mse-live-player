@@ -29,13 +29,69 @@ class VideoPlayer {
             this._callback('"options.io is not an instance of socket.io');
             return;
         }
+
         this._video = options.video;
+
+        if (options.controls) {
+            const ssb = options.controls.indexOf('startstop') !== -1;
+            const fsb = options.controls.indexOf('fullscreen') !== -1;
+            if (ssb || fsb) {
+                const parentDiv = document.createElement('div');
+                parentDiv.className = 'video';
+                this._video.parentNode.replaceChild(parentDiv, this._video);
+                this._video.className = 'mse';
+                this._video.controls = false;
+                this._video.removeAttribute('controls');
+                parentDiv.appendChild(this._video);
+
+                if (ssb) {
+                    const startstopButton = document.createElement('button');
+                    startstopButton.innerHTML = '<i class="fa fa-play fa-2x" style="color:white" aria-hidden="true"></i>';
+                    startstopButton.className = 'startstop';
+                    startstopButton.addEventListener('click', (event) => {
+                        alert('start/stop button not implemented yet');
+                        return;
+                        /*if (this._running) {
+                            this.stop();
+                        } else {
+                            this.start();
+                        }*/
+                    });
+                    parentDiv.appendChild(startstopButton);
+                }
+
+                if (fsb) {
+                    const fullscreenButton = document.createElement('button');
+                    fullscreenButton.innerHTML = '<i class="fa fa-arrows-alt fa-2x" style="color:white" aria-hidden="true"></i>';
+                    fullscreenButton.className = 'fullscreen';
+                    fullscreenButton.addEventListener('click', (event) => {
+                        if (this._video.parentNode.requestFullscreen) {
+                            this._video.parentNode.requestFullscreen();
+                        } else if (this._video.parentNode.mozRequestFullScreen) {
+                            this._video.parentNode.mozRequestFullScreen();
+                        } else if (this._video.parentNode.webkitRequestFullScreen) {
+                            this._video.parentNode.webkitRequestFullScreen();
+                        } else if (this._video.parentNode.msRequestFullscreen) {
+                            this._video.parentNode.msRequestFullscreen();
+                        }
+                    });
+                    parentDiv.appendChild(fullscreenButton);
+                }
+            }
+            
+            
+        }
+
         this._addVideoEvents();
         //todo check namespace first, then check socket.io as user has intention to use socket.io
         this._namespace = options.namespace;//might be room or namespace of socket todo
         this._io = options.io;
         //only supporting socket.io at this point todo add support for ws
         return this;
+    }
+    
+    _createControls(value) {
+        
     }
 
     start() {
@@ -302,9 +358,9 @@ class VideoPlayer {
         delete this.onSocketError;
         this._socket.removeEventListener('mime', this.onMime, {capture: true, passive: true, once: true});
         delete this.onMime;
-        this._socket.removeEventListener('init', this.onInit, {capture: true, passive: true, once: true});
+        this._socket.removeEventListener('initialization', this.onInit, {capture: true, passive: true, once: true});
         delete this.onInit;
-        this._socket.removeEventListener('segments', this.onSegment, {capture: true, passive: true, once: false});
+        this._socket.removeEventListener('segment', this.onSegment, {capture: true, passive: true, once: false});
         delete this.onSegment;
     }
 
@@ -327,7 +383,7 @@ class VideoPlayer {
         const video = videos[i];
         //only grab video elements that deliberately have data-namespace attribute
         if (video.dataset.namespace) {
-            videoPlayers.push(new VideoPlayer({video: video, io: io, namespace: video.dataset.namespace}).start());
+            videoPlayers.push(new VideoPlayer({video: video, io: io, namespace: video.dataset.namespace, controls: video.dataset.controls}).start());
         }
     }
 
