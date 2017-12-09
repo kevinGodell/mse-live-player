@@ -125,6 +125,7 @@ class VideoPlayer {
 
     _onMediaSourceOpen(event) {
         //this._callback(null, `media source open ${event.type}`);
+        URL.revokeObjectURL(this._video.src);
         this._mediaSource.duration = Number.POSITIVE_INFINITY;
         this._sourceBuffer = this._mediaSource.addSourceBuffer(this._mime);
         this._sourceBuffer.mode = 'sequence';
@@ -222,7 +223,6 @@ class VideoPlayer {
         delete this.onSourceBufferUpdateEnd;
     }
 
-
     ///////////////////// socket.io events //////////////////////////////
     
     _onSocketConnect(event) {
@@ -266,8 +266,8 @@ class VideoPlayer {
     _onSegment(data) {
         if (this._sourceBuffer.buffered.length) {
             const lag = this._sourceBuffer.buffered.end(0) - this._video.currentTime;
-            if (lag > 1) {
-                this._video.currentTime = this._sourceBuffer.buffered.end(0) - 1;
+            if (lag > 0.5) {
+                this._video.currentTime = this._sourceBuffer.buffered.end(0) - 0.5;
             }
         }
         if (this._sourceBuffer.updating) {
