@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "node server.js",
-    "start" : "node compare.js"
+    "start": "node compare.js"
   },
   "repository": {
     "type": "git",
