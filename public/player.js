@@ -36,28 +36,45 @@ class VideoPlayer {
             const ssb = options.controls.indexOf('startstop') !== -1;
             const fsb = options.controls.indexOf('fullscreen') !== -1;
             if (ssb || fsb) {
-                const parentDiv = document.createElement('div');
-                parentDiv.className = 'video';
-                this._video.parentNode.replaceChild(parentDiv, this._video);
+
+                this._container = document.createElement('div');
+                this._container.className = 'video';
+                this._video.parentNode.replaceChild(this._container, this._video);
                 this._video.className = 'mse';
                 this._video.controls = false;
                 this._video.removeAttribute('controls');
-                parentDiv.appendChild(this._video);
+                this._container.appendChild(this._video);
 
                 if (ssb) {
-                    const startstopButton = document.createElement('button');
-                    startstopButton.innerHTML = '<i class="fa fa-play fa-2x" style="color:white" aria-hidden="true"></i>';
-                    startstopButton.className = 'startstop';
-                    startstopButton.addEventListener('click', (event) => {
-                        alert('start/stop button not implemented yet');
-                        return;
-                        /*if (this._running) {
+                    this._startstop = document.createElement('button');
+                    this._start = document.createElement('i');
+                    this._start.className = 'fa fa-play fa-2x';
+                    this._start.style.color = 'white';
+                    this._start.setAttribute('aria-hidden', 'true');
+                    this._startstop.appendChild(this._start);
+
+                    this._stop = document.createElement('i');
+                    this._stop.className = 'fa fa-stop fa-2x';
+                    this._stop.style.color = 'white';
+                    this._stop.setAttribute('aria-hidden', 'true');
+                    //this._startstop.appendChild(this._stop);
+                    //this._stop.style.display = 'none';
+
+                    //this._startstop.innerHTML = '<i class="fa fa-play fa-2x" style="color:white" aria-hidden="true"></i>';
+
+                    this._running = false;
+
+                    this._startstop.className = 'startstop';
+                    this._startstop.addEventListener('click', (event) => {
+                        //alert('start/stop button not implemented yet');
+                        //return;
+                        if (this._running) {
                             this.stop();
                         } else {
                             this.start();
-                        }*/
+                        }
                     });
-                    parentDiv.appendChild(startstopButton);
+                    this._container.appendChild(this._startstop);
                 }
 
                 if (fsb) {
@@ -65,17 +82,17 @@ class VideoPlayer {
                     fullscreenButton.innerHTML = '<i class="fa fa-arrows-alt fa-2x" style="color:white" aria-hidden="true"></i>';
                     fullscreenButton.className = 'fullscreen';
                     fullscreenButton.addEventListener('click', (event) => {
-                        if (this._video.parentNode.requestFullscreen) {
-                            this._video.parentNode.requestFullscreen();
-                        } else if (this._video.parentNode.mozRequestFullScreen) {
-                            this._video.parentNode.mozRequestFullScreen();
-                        } else if (this._video.parentNode.webkitRequestFullScreen) {
-                            this._video.parentNode.webkitRequestFullScreen();
-                        } else if (this._video.parentNode.msRequestFullscreen) {
-                            this._video.parentNode.msRequestFullscreen();
+                        if (this._container.requestFullscreen) {
+                            this._container.requestFullscreen();
+                        } else if (this._container.mozRequestFullScreen) {
+                            this._container.mozRequestFullScreen();
+                        } else if (this._container.webkitRequestFullScreen) {
+                            this._container.webkitRequestFullScreen();
+                        } else if (this._container.msRequestFullscreen) {
+                            this._container.msRequestFullscreen();
                         }
                     });
-                    parentDiv.appendChild(fullscreenButton);
+                    this._container.appendChild(fullscreenButton);
                 }
             }
             
@@ -95,6 +112,10 @@ class VideoPlayer {
     }
 
     start() {
+        if (this._startstop) {
+            this._startstop.replaceChild(this._stop, this._start);
+        }
+        this._running = true;
         this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
         this._addSocketEvents();
         return this;
@@ -102,6 +123,11 @@ class VideoPlayer {
 
     stop() {
         //todo
+        this._running = false;
+        if (this._startstop) {
+            this._startstop.replaceChild(this._start, this._stop);
+        }
+        this._cleanUp();
     }
 
     destroy() {
@@ -121,7 +147,7 @@ class VideoPlayer {
         console.info(str);
     }
 
-    _cleanUp() {
+    _cleanUp() {//todo will change to stop, need to add public destroy() that will call stop() and cleanup
         this._callback(null, 'CLEAN UP');
         if (this._video) {
             this._removeVideoEvents();
@@ -130,16 +156,18 @@ class VideoPlayer {
             this._video.load();
         }
         if (this._socket) {
+            alert(this._socket.connected);
             this._removeSocketEvents();
-            this._socket.disconnect();
+            if (this._socket.connected) {
+                this._socket.disconnect();
+            }
             delete this._socket;
         }
         if (this._mediaSource) {
             this._removeMediaSourceEvents();
-            if (this._mediaSource.sourceBuffers.length) {
+            if (this._mediaSource.sourceBuffers && this._mediaSource.sourceBuffers.length) {
                 this._mediaSource.removeSourceBuffer(this._sourceBuffer);
             }
-            URL.revokeObjectURL(this._mediaSource);
             delete this._mediaSource;
         }
         if (this._sourceBuffer) {
