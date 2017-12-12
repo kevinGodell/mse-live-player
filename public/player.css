@@ -1,4 +1,4 @@
-div.container {
+div.mse-container {
     position: relative;
     float: left;
     display: inline-block;
@@ -8,42 +8,42 @@ div.container {
 
 /* bug: pseudo selectors for :fullscreen, :-moz-full-screen, and :-webkit-full-screen cannot be grouped together */
 
-div.container:fullscreen {
+div.mse-container:fullscreen {
     width: 100%;
     height: 100%;
 }
 
-div.container:-moz-full-screen {
+div.mse-container:-moz-full-screen {
     width: 100%;
     height: 100%;
 }
 
-div.container:-webkit-full-screen {
+div.mse-container:-webkit-full-screen {
     width: 100%;
     height: 100%;
 }
 
-video.mse {
+video.mse-video {
     pointer-events: none;
     cursor: none;
 }
 
-div.container:fullscreen video.mse {
+div.mse-container:fullscreen video.mse-video {
     width: 100%;
     height: 100%;
 }
 
-div.container:-moz-full-screen video.mse {
+div.mse-container:-moz-full-screen video.mse-video {
     width: 100%;
     height: 100%;
 }
 
-div.container:-webkit-full-screen video.mse {
+div.mse-container:-webkit-full-screen video.mse-video {
     width: 100%;
     height: 100%;
 }
 
-div.controls {
+div.mse-controls {
     position: absolute;
     background: black;
     border: 1px solid white;
@@ -55,11 +55,11 @@ div.controls {
     opacity: 0;
 }
 
-div.controls:hover {
+div.mse-controls:hover {
     opacity: 0.8;
 }
 
-div.controls button {
+div.mse-controls button {
     background-color: transparent;
     border: none;
     outline: none;
@@ -70,33 +70,33 @@ div.controls button {
     margin: 1px;
 }
 
-div.controls button:hover {
+div.mse-controls button:hover {
     opacity: 1;
 }
 
-div.controls button:active {
+div.mse-controls button:active {
     opacity: 0.6;
 }
 
-button.start, button.stop {
+button.mse-start, button.mse-stop {
     float: left;
 }
 
-button.start:before {
+button.mse-start:before {
     font-family: FontAwesome;
     content: "\f04b";
 }
 
-button.stop:before {
+button.mse-stop:before {
     font-family: FontAwesome;
     content: "\f04d";
 }
 
-button.fullscreen {
+button.mse-fullscreen {
     float: right;
 }
 
-div.container:fullscreen div.controls {
+div.mse-container:fullscreen div.mse-controls {
     border: 2px solid white;
     left: 10px;
     right: 10px;
@@ -105,7 +105,7 @@ div.container:fullscreen div.controls {
     border-radius: 10px;
 }
 
-div.container:-moz-full-screen div.controls {
+div.mse-container:-moz-full-screen div.mse-controls {
     border: 2px solid white;
     left: 10px;
     right: 10px;
@@ -114,7 +114,7 @@ div.container:-moz-full-screen div.controls {
     border-radius: 10px;
 }
 
-div.container:-webkit-full-screen div.controls {
+div.mse-container:-webkit-full-screen div.mse-controls {
     border: 2px solid white;
     left: 10px;
     right: 10px;
@@ -123,29 +123,29 @@ div.container:-webkit-full-screen div.controls {
     border-radius: 10px;
 }
 
-div.container:fullscreen button {
+div.mse-container:fullscreen button {
     font-size: 32px;
 }
 
-div.container:-moz-full-screen button {
+div.mse-container:-moz-full-screen button {
     font-size: 32px;
 }
 
-div.container:-moz-full-screen button.fullscreen:before {
+div.mse-container:-moz-full-screen button.mse-fullscreen:before {
     font-family: FontAwesome;
     content: "\f066";
 }
 
-div.container:-webkit-full-screen button {
+div.mse-container:-webkit-full-screen button {
     font-size: 32px;
 }
 
-div.container:-webkit-full-screen button.fullscreen:before {
+div.mse-container:-webkit-full-screen button.mse-fullscreen:before {
     font-family: FontAwesome;
     content: "\f066";
 }
 
-button.fullscreen:before {
+button.mse-fullscreen:before {
     font-family: FontAwesome;
     content: "\f065";
 }

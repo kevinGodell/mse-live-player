@@ -36,18 +36,18 @@ class VideoPlayer {
             //todo: mute and volume will be determined automatically
             if (ssb || fsb) {
                 this._container = document.createElement('div');
-                this._container.className = 'container';
+                this._container.className = 'mse-container';
                 this._video.parentNode.replaceChild(this._container, this._video);
-                this._video.className = 'mse';
+                this._video.className = 'mse-video';
                 this._video.controls = false;
                 this._video.removeAttribute('controls');
                 this._container.appendChild(this._video);
                 this._controls = document.createElement('div');
-                this._controls.className = 'controls';
+                this._controls.className = 'mse-controls';
                 this._container.appendChild(this._controls);
                 if (ssb) {
                     this._startstop = document.createElement('button');
-                    this._startstop.className = 'start';
+                    this._startstop.className = 'mse-start';
                     this._startstop.addEventListener('click', (event) => {
                         this.togglePlay();
                     });
@@ -55,7 +55,7 @@ class VideoPlayer {
                 }
                 if (fsb) {
                     this._fullscreen = document.createElement('button');
-                    this._fullscreen.className = 'fullscreen';
+                    this._fullscreen.className = 'mse-fullscreen';
                     this._fullscreen.addEventListener('click', (event) => {
                         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
                             if (this._container.requestFullscreen) {
@@ -95,10 +95,10 @@ class VideoPlayer {
         if (!this._startstop) {
             return;
         }
-        if (this._startstop.className === 'start') {
-            this._startstop.className = 'stop';
+        if (this._startstop.className === 'mse-start') {
+            this._startstop.className = 'mse-stop';
         } else {
-            this._startstop.className = 'start';
+            this._startstop.className = 'mse-start';
         }
     }
 
