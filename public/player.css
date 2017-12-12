@@ -1,164 +1,151 @@
-video.mse {
-    background: linear-gradient(black, grey, black);
-    border: 1px solid black !important;
-    box-shadow: 5px 4px 6px rgba(0, 0, 0, 0.75);
-    margin: 1px;
-    padding: 1px;
-    pointer-events: none;
-}
-
-div {
-    float: left;
-    text-align: center;
-}
-
-div.video {
-    float: left;
-    background: tomato;
-    display: inline-block;
+div.container {
     position: relative;
+    float: left;
+    display: inline-block;
+    background: linear-gradient(black, grey, black);
     margin: 1px;
-    padding: 1px;
 }
 
-div.video:fullscreen {
-    width: 100%;
-    height: 100%;
-    background: red;
-}
+/* bug: pseudo selectors for :fullscreen, :-moz-full-screen, and :-webkit-full-screen cannot be grouped together */
 
-div.video:-moz-full-screen {
-    width: 100%;
-    height: 100%;
-    background: green;
-    margin: 0%;
-    padding: 0%;
-}
-
-div.video:-moz-full-screen video.mse {
-    width: 100%;
-    height: 100%;
-    margin: 0%;
-    padding: 0%;
-}
-
-div.video:-webkit-full-screen {
-    width: 100%;
-    height: 100%;
-    background: blue;
-    margin: 0%;
-    padding: 0%;
-}
-
-div.video:-webkit-full-screen video.mse {
-    width: 100%;
-    height: 100%;
-    margin: 0%;
-    padding: 0%;
-}
-
-div.video:hover button.startstop, div.video:hover button.fullscreen {
-    display: block;
-}
-
-div.video:fullscreen video.mse {
+div.container:fullscreen {
     width: 100%;
     height: 100%;
 }
 
-button.startstop {
+div.container:-moz-full-screen {
+    width: 100%;
+    height: 100%;
+}
+
+div.container:-webkit-full-screen {
+    width: 100%;
+    height: 100%;
+}
+
+video.mse {
+    pointer-events: none;
+    cursor: none;
+}
+
+div.container:fullscreen video.mse {
+    width: 100%;
+    height: 100%;
+}
+
+div.container:-moz-full-screen video.mse {
+    width: 100%;
+    height: 100%;
+}
+
+div.container:-webkit-full-screen video.mse {
+    width: 100%;
+    height: 100%;
+}
+
+div.controls {
     position: absolute;
-    left: 15px;
-    bottom: 15px;
+    background: black;
+    border: 1px solid white;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    padding: 3px;
+    border-radius: 5px;
+    opacity: 0;
+}
+
+div.controls:hover {
+    opacity: 0.8;
+}
+
+div.controls button {
     background-color: transparent;
     border: none;
     outline: none;
-    display: none;
-    opacity: 0.3;
-    /*z-index: 2147483647;*/
+    opacity: 0.8;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    margin: 1px;
 }
 
-button.fullscreen {
-    position: absolute;
-    right: 15px;
-    bottom: 15px;
-    background-color: transparent;
-    border: none;
-    outline: none;
-    display: none;
-    opacity: 0.3;
-    /*z-index: 2147483647;*/
-}
-
-button.fullscreen:hover, button.startstop:hover {
+div.controls button:hover {
     opacity: 1;
 }
 
-button.fullscreen:active, button.startstop:active {
+div.controls button:active {
     opacity: 0.6;
 }
 
-/*video::-webkit-media-controls {
-    display:none !important;
+button.start, button.stop {
+    float: left;
 }
 
-video::-webkit-media-controls-enclosure {
-    display:none !important;
+button.start:before {
+    font-family: FontAwesome;
+    content: "\f04b";
 }
 
-video::-webkit-media-controls-fullscreen-button, video::-webkit-media-controls-play-button, video::-webkit-media-controls-pausebutton {
-    display: none !important;
-}*/
-
-
-/*div.videoDiv:nth-child(2), div.videoDiv:nth-child(3) {
-    flex: 1 0 50%;
+button.stop:before {
+    font-family: FontAwesome;
+    content: "\f04d";
 }
 
-div.videoDiv:first-child {
-    flex: 0 1 100%;
+button.fullscreen {
+    float: right;
 }
 
-div.videoDiv video {
-    pointer-events: none;
-}*/
-
-/*video::-webkit-media-controls {
-    display: none;
+div.container:fullscreen div.controls {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
 }
 
-video::-webkit-media-controls {
-    display: none !important;
+div.container:-moz-full-screen div.controls {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
 }
 
-video::-webkit-media-controls-fullscreen-button, video::-webkit-media-controls-play-button, video::-webkit-media-controls-pausebutton {
-    display: none;
+div.container:-webkit-full-screen div.controls {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
 }
 
-video::-webkit-media-controls-play-button {
-    display: none;
+div.container:fullscreen button {
+    font-size: 32px;
 }
 
-video::-webkit-media-controls-volume-slider {
-    display: none;
+div.container:-moz-full-screen button {
+    font-size: 32px;
 }
 
-video::-webkit-media-controls-mute-button {
-    display: none;
+div.container:-moz-full-screen button.fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f066";
 }
 
-video::-webkit-media-controls-timeline {
-    display: none;
+div.container:-webkit-full-screen button {
+    font-size: 32px;
 }
 
-video::-webkit-media-controls-current-time-display {
-    display: none;
+div.container:-webkit-full-screen button.fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f066";
 }
 
-video::-webkit-media-controls-start-playback-button {
-    display: none;
+button.fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f065";
 }
-
-video {
-    pointer-events: none;
-}*/
