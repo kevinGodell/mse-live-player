@@ -29,76 +29,60 @@ class VideoPlayer {
             this._callback('"options.io is not an instance of socket.io');
             return;
         }
-
         this._video = options.video;
-
         if (options.controls) {
             const ssb = options.controls.indexOf('startstop') !== -1;
             const fsb = options.controls.indexOf('fullscreen') !== -1;
+            //todo: mute and volume will be determined automatically
             if (ssb || fsb) {
-
                 this._container = document.createElement('div');
-                this._container.className = 'video';
+                this._container.className = 'container';
                 this._video.parentNode.replaceChild(this._container, this._video);
                 this._video.className = 'mse';
                 this._video.controls = false;
                 this._video.removeAttribute('controls');
                 this._container.appendChild(this._video);
-
+                this._controls = document.createElement('div');
+                this._controls.className = 'controls';
+                this._container.appendChild(this._controls);
                 if (ssb) {
                     this._startstop = document.createElement('button');
-                    this._start = document.createElement('i');
-                    this._start.className = 'fa fa-play fa-2x';
-                    this._start.style.color = 'white';
-                    this._start.setAttribute('aria-hidden', 'true');
-                    this._startstop.appendChild(this._start);
-
-                    this._stop = document.createElement('i');
-                    this._stop.className = 'fa fa-stop fa-2x';
-                    this._stop.style.color = 'white';
-                    this._stop.setAttribute('aria-hidden', 'true');
-                    //this._startstop.appendChild(this._stop);
-                    //this._stop.style.display = 'none';
-
-                    //this._startstop.innerHTML = '<i class="fa fa-play fa-2x" style="color:white" aria-hidden="true"></i>';
-
-                    this._running = false;
-
-                    this._startstop.className = 'startstop';
+                    this._startstop.className = 'start';
                     this._startstop.addEventListener('click', (event) => {
-                        //alert('start/stop button not implemented yet');
-                        //return;
-                        if (this._running) {
-                            this.stop();
-                        } else {
-                            this.start();
-                        }
+                        this.togglePlay();
                     });
-                    this._container.appendChild(this._startstop);
+                    this._controls.appendChild(this._startstop);
                 }
-
                 if (fsb) {
-                    const fullscreenButton = document.createElement('button');
-                    fullscreenButton.innerHTML = '<i class="fa fa-arrows-alt fa-2x" style="color:white" aria-hidden="true"></i>';
-                    fullscreenButton.className = 'fullscreen';
-                    fullscreenButton.addEventListener('click', (event) => {
-                        if (this._container.requestFullscreen) {
-                            this._container.requestFullscreen();
-                        } else if (this._container.mozRequestFullScreen) {
-                            this._container.mozRequestFullScreen();
-                        } else if (this._container.webkitRequestFullScreen) {
-                            this._container.webkitRequestFullScreen();
-                        } else if (this._container.msRequestFullscreen) {
-                            this._container.msRequestFullscreen();
-                        }
+                    this._fullscreen = document.createElement('button');
+                    this._fullscreen.className = 'fullscreen';
+                    this._fullscreen.addEventListener('click', (event) => {
+                        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                            if (this._container.requestFullscreen) {
+                                this._container.requestFullscreen();
+                            } else if (this._container.msRequestFullscreen) {
+                                this._container.msRequestFullscreen();
+                            } else if (this._container.mozRequestFullScreen) {
+                                this._container.mozRequestFullScreen();
+                            } else if (this._container.webkitRequestFullscreen) {
+                                this._container.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                            }
+                        } else {
+                            if (document.exitFullscreen) {
+                                document.exitFullscreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            } else if (document.mozCancelFullScreen) {
+                                document.mozCancelFullScreen();
+                            } else if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            }
+                        }       
                     });
-                    this._container.appendChild(fullscreenButton);
+                    this._controls.appendChild(this._fullscreen);
                 }
             }
-            
-            
         }
-
         this._addVideoEvents();
         //todo check namespace first, then check socket.io as user has intention to use socket.io
         this._namespace = options.namespace;//might be room or namespace of socket todo
@@ -107,15 +91,22 @@ class VideoPlayer {
         return this;
     }
     
-    _createControls(value) {
-        
+    togglePlay() {
+        if (!this._startstop) {
+            return;
+        }
+        if (this._startstop.className === 'start') {
+            this._startstop.className = 'stop';
+        } else {
+            this._startstop.className = 'start';
+        }
     }
 
     start() {
-        if (this._startstop) {
-            this._startstop.replaceChild(this._stop, this._start);
-        }
-        this._running = true;
+        //if (this._startstop) {
+            //this._startstop.replaceChild(this._stop, this._start);
+        //}
+        //this._running = true;
         this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
         this._addSocketEvents();
         return this;
@@ -123,10 +114,10 @@ class VideoPlayer {
 
     stop() {
         //todo
-        this._running = false;
-        if (this._startstop) {
-            this._startstop.replaceChild(this._start, this._stop);
-        }
+        //this._running = false;
+        //if (this._startstop) {
+            //this._startstop.replaceChild(this._start, this._stop);
+        //}
         this._cleanUp();
     }
 
@@ -156,7 +147,7 @@ class VideoPlayer {
             this._video.load();
         }
         if (this._socket) {
-            alert(this._socket.connected);
+            //alert(this._socket.connected);
             this._removeSocketEvents();
             if (this._socket.connected) {
                 this._socket.disconnect();
@@ -182,7 +173,7 @@ class VideoPlayer {
     ///////////////////// video element events /////////////////////////
 
     _onVideoError(event) {
-        this._callback(`video ${event.type}`);
+        this._callback(`video error ${event.type}`);
     }
 
     _addVideoEvents() {
