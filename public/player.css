@@ -3,7 +3,7 @@ div.mse-container {
     float: left;
     display: inline-block;
     background: linear-gradient(black, grey, black);
-    margin: 1px;
+    border: 1px solid white;
 }
 
 /* bug: pseudo selectors for :fullscreen, :-moz-full-screen, and :-webkit-full-screen cannot be grouped together */
