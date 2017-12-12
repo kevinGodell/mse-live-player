@@ -11,10 +11,10 @@ class VideoPlayer {
         } else {
             this._callback = (err, msg) => {
                 if (err) {
-                    console.error(`VideoPlayer Error: ${err} ${this._namespace}`);
+                    console.error(`VideoPlayer Error: ${err} Namespace: ${this._namespace}`);
                     return;
                 }
-                console.log(`VideoPlayer Message: ${msg} ${this._namespace}`);
+                console.log(`VideoPlayer Message: ${msg} Namespace: ${this._namespace}`);
             };
         }
         if (!options.video || !(options.video instanceof HTMLVideoElement)) {
@@ -84,47 +84,13 @@ class VideoPlayer {
             }
         }
         this._addVideoEvents();
-        //todo check namespace first, then check socket.io as user has intention to use socket.io
-        this._namespace = options.namespace;//might be room or namespace of socket todo
+        this._namespace = options.namespace;
         this._io = options.io;
-        //only supporting socket.io at this point todo add support for ws
-        return this;
-    }
-    
-    togglePlay() {
-        if (!this._startstop) {
-            return;
-        }
-        if (this._startstop.className === 'mse-start') {
-            this._startstop.className = 'mse-stop';
-        } else {
-            this._startstop.className = 'mse-start';
-        }
-    }
-
-    start() {
-        //if (this._startstop) {
-            //this._startstop.replaceChild(this._stop, this._start);
-        //}
-        //this._running = true;
-        this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
-        this._addSocketEvents();
         return this;
     }
 
-    stop() {
-        //todo
-        //this._running = false;
-        //if (this._startstop) {
-            //this._startstop.replaceChild(this._start, this._stop);
-        //}
-        this._cleanUp();
-    }
+    ////////////////////////// public methods ////////////////////////////
 
-    destroy() {
-        //todo
-    }
-    
     mediaInfo() {
         let str = `******************\n`;
         str += `namespace : ${this._namespace}\n`;
@@ -137,17 +103,47 @@ class VideoPlayer {
         str += `******************\n`;
         console.info(str);
     }
+    
+    togglePlay() {
+        if (this._playing === true) {
+            this.stop();
+        } else {
+            this.start();
+        }
+        return this;
+    }
 
-    _cleanUp() {//todo will change to stop, need to add public destroy() that will call stop() and cleanup
-        this._callback(null, 'CLEAN UP');
+    start() {
+        if (this._playing === true) {
+            this.stop();
+        }
+        if (this._startstop) {
+            this._startstop.className = 'mse-stop';
+            this._startstop.disabled = true;
+        }
+        this._playing = true;
+        this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
+        this._addSocketEvents();
+        if (this._startstop) {
+            this._startstop.disabled = false;
+        }
+        return this;
+    }
+
+    stop() {
+        if (this._startstop) {
+            this._startstop.className = 'mse-start';
+            this._startstop.disabled = true;
+        }
+        this._playing = false;
         if (this._video) {
             this._removeVideoEvents();
             this._video.pause();
-            this._video.src = '';
+            this._video.removeAttribute('src');
+            //this._video.src = '';//todo: not sure if removing this will cause memory leak
             this._video.load();
         }
         if (this._socket) {
-            //alert(this._socket.connected);
             this._removeSocketEvents();
             if (this._socket.connected) {
                 this._socket.disconnect();
@@ -168,6 +164,15 @@ class VideoPlayer {
             }
             delete this._sourceBuffer;
         }
+        if (this._startstop) {
+            this._startstop.disabled = false;
+        }
+        return this;
+    }
+
+    destroy() {
+        //todo: possibly strip control buttons and other layers added around video player
+        return this;
     }
 
     ///////////////////// video element events /////////////////////////
@@ -199,7 +204,6 @@ class VideoPlayer {
     }
 
     _onMediaSourceOpen(event) {
-        //this._callback(null, `media source open ${event.type}`);
         URL.revokeObjectURL(this._video.src);
         this._mediaSource.duration = Number.POSITIVE_INFINITY;
         this._sourceBuffer = this._mediaSource.addSourceBuffer(this._mime);
@@ -309,13 +313,13 @@ class VideoPlayer {
     }
     
     _onSocketDisconnect(event) {
-        this._callback(`socket disconnect "${event}"`);
-        this._cleanUp();
+        this._callback(null, `socket disconnect "${event}"`);
+        this.stop();
     }
     
     _onSocketError(event) {
         this._callback(`socket error "${event}"`);
-        this._cleanUp();
+        this.stop();
     }
 
     _onMime(data) {
@@ -402,10 +406,13 @@ class VideoPlayer {
         const video = videos[i];
         //only grab video elements that deliberately have data-namespace attribute
         if (video.dataset.namespace) {
-            videoPlayers.push(new VideoPlayer({video: video, io: io, namespace: video.dataset.namespace, controls: video.dataset.controls}).start());
+            const videoPlayer = new VideoPlayer({video: video, io: io, namespace: video.dataset.namespace, controls: video.dataset.controls});
+            if (video.autoplay) {
+                videoPlayer.start();
+            }
+            videoPlayers.push(videoPlayer);
         }
     }
-
 })();
 
 
