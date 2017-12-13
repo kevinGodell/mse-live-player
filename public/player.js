@@ -91,6 +91,7 @@ class VideoPlayer {
                         canvas.width = this._video.videoWidth;
                         canvas.height = this._video.videoHeight;
                         const ctx = canvas.getContext('2d');
+                        ctx.globalAlpha = 1.0;
                         ctx.fillStyle = '#f90';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(this._video, 0, 0, canvas.width, canvas.height);
@@ -413,7 +414,7 @@ class VideoPlayer {
 
 }
 
-(function () {
+(function mse(window) {
 
     if (!('io' in window)) {
         throw new Error('socket.io was not found');
@@ -437,7 +438,11 @@ class VideoPlayer {
             videoPlayers.push(videoPlayer);
         }
     }
-})();
+
+    //make videoPlayers accessible
+    window.videoPlayers = videoPlayers;
+
+})(window);
 
 
 //todo steps for creation of video player
