@@ -33,8 +33,9 @@ class VideoPlayer {
         if (options.controls) {
             const ssb = options.controls.indexOf('startstop') !== -1;
             const fsb = options.controls.indexOf('fullscreen') !== -1;
+            const snb = options.controls.indexOf('snapshot') !== -1;
             //todo: mute and volume will be determined automatically
-            if (ssb || fsb) {
+            if (ssb || fsb || snb) {
                 this._container = document.createElement('div');
                 this._container.className = 'mse-container';
                 this._video.parentNode.replaceChild(this._container, this._video);
@@ -80,6 +81,29 @@ class VideoPlayer {
                         }       
                     });
                     this._controls.appendChild(this._fullscreen);
+                }
+                if (snb) {
+                    this._video.play();
+                    this._snapshot = document.createElement('button');
+                    this._snapshot.className = 'mse-snapshot';
+                    this._snapshot.addEventListener('click', (event) => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = this._video.videoWidth;
+                        canvas.height = this._video.videoHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#f90';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(this._video, 0, 0, canvas.width, canvas.height);
+                        const href = canvas.toDataURL('image/jpeg', 1.0);
+                        const link = document.createElement('a');
+                        link.href = href;
+                        const date = new Date().getTime();
+                        link.download = `${this._namespace}-${new Date().getTime()}-snapshot.jpeg`;
+                        this._container.appendChild(link);
+                        link.click();
+                        this._container.removeChild(link);
+                    });
+                    this._controls.appendChild(this._snapshot);
                 }
             }
         }

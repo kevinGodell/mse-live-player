@@ -92,7 +92,7 @@ button.mse-stop:before {
     content: "\f04d";
 }
 
-button.mse-fullscreen {
+button.mse-fullscreen, button.mse-snapshot {
     float: right;
 }
 
@@ -148,4 +148,9 @@ div.mse-container:-webkit-full-screen button.mse-fullscreen:before {
 button.mse-fullscreen:before {
     font-family: FontAwesome;
     content: "\f065";
+}
+
+button.mse-snapshot:before {
+    font-family: FontAwesome;
+    content: "\f030";
 }

@@ -5,6 +5,7 @@
     <title>player</title>
     <link href='/public/player.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--<script defer src="https://use.fontawesome.com/releases/v5.0.1/js/all.js"></script>-->
     <style>
         video {
             width: 275px;
@@ -14,7 +15,7 @@
 </head>
 <body>
 
-<video autoplay data-namespace="one" data-controls="startstop|fullscreen"></video>
+<video autoplay data-namespace="one" data-controls="startstop|fullscreen|snapshot"></video>
 
 <video autoplay data-namespace="two" data-controls="startstop|fullscreen"></video>
 
@@ -43,7 +44,7 @@
 <video autoplay data-namespace="fourteen" data-controls="startstop|fullscreen"></video>
 
 <script src ="/socket.io/socket.io.js"></script>
-<script src="/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
+<script src="/public/player.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
 
 </body>
 </html>
