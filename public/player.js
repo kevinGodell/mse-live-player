@@ -78,28 +78,32 @@ class VideoPlayer {
                             } else if (document.webkitExitFullscreen) {
                                 document.webkitExitFullscreen();
                             }
-                        }       
+                        }
                     });
                     this._controls.appendChild(this._fullscreen);
                 }
                 if (snb) {
-                    this._video.play();
                     this._snapshot = document.createElement('button');
                     this._snapshot.className = 'mse-snapshot';
                     this._snapshot.addEventListener('click', (event) => {
+                        if (this._video.readyState < 2) {
+                            this._callback(null, `readyState: ${this._video.readyState} < 2`);
+                            return;
+                        }
+                        //safari bug, cannot use video for drawImage when it is being used as media source extension (only works when using regular m3u8 playlist)
+                        //will hide icon until creating a server side response to deliver a snapshot
                         const canvas = document.createElement("canvas");
+                        //this._container.appendChild(canvas);
                         canvas.width = this._video.videoWidth;
                         canvas.height = this._video.videoHeight;
                         const ctx = canvas.getContext('2d');
-                        ctx.globalAlpha = 1.0;
-                        ctx.fillStyle = '#f90';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(this._video, 0, 0, canvas.width, canvas.height);
                         const href = canvas.toDataURL('image/jpeg', 1.0);
                         const link = document.createElement('a');
                         link.href = href;
                         const date = new Date().getTime();
                         link.download = `${this._namespace}-${new Date().getTime()}-snapshot.jpeg`;
+                        //link must be added so that link.click() will work on firefox
                         this._container.appendChild(link);
                         link.click();
                         this._container.removeChild(link);
@@ -108,7 +112,6 @@ class VideoPlayer {
                 }
             }
         }
-        this._addVideoEvents();
         this._namespace = options.namespace;
         this._io = options.io;
         return this;
@@ -147,6 +150,7 @@ class VideoPlayer {
             this._startstop.disabled = true;
         }
         this._playing = true;
+        this._addVideoEvents();
         this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
         this._addSocketEvents();
         if (this._startstop) {
@@ -165,7 +169,7 @@ class VideoPlayer {
             this._removeVideoEvents();
             this._video.pause();
             this._video.removeAttribute('src');
-            //this._video.src = '';//todo: not sure if removing this will cause memory leak
+            //this._video.src = '';//todo: not sure if NOT removing this will cause memory leak
             this._video.load();
         }
         if (this._socket) {
@@ -205,6 +209,23 @@ class VideoPlayer {
     _onVideoError(event) {
         this._callback(`video error ${event.type}`);
     }
+    
+    _onVideoLoadedData(event) {
+        this._callback(null, `video loaded data ${event.type}`);
+        if ('Promise' in window) {
+            this._video.play()
+                .then(() => {
+                    //this._callback(null, 'play promise fulfilled');
+                    //todo remove "click to play" poster
+                })
+                .catch((error) => {
+                    this._callback(error);
+                    //todo add "click to play" poster
+                });
+        } else {
+            this._video.play();
+        }
+    }
 
     _addVideoEvents() {
         if (!this._video) {
@@ -212,6 +233,9 @@ class VideoPlayer {
         }
         this.onVideoError = this._onVideoError.bind(this);
         this._video.addEventListener('error', this.onVideoError, {capture: true, passive: true, once: true});
+        this.onVideoLoadedData = this._onVideoLoadedData.bind(this);
+        this._video.addEventListener('loadeddata', this.onVideoLoadedData, {capture: true, passive: true, once: true});
+        this._callback(null, 'added video events');
     }
 
     _removeVideoEvents() {
@@ -220,6 +244,9 @@ class VideoPlayer {
         }
         this._video.removeEventListener('error', this.onVideoError, {capture: true, passive: true, once: true});
         delete this.onVideoError;
+        this._video.removeEventListener('loadeddata', this.onVideoLoadedData, {capture: true, passive: true, once: true});
+        delete this.onVideoLoadedData;
+        this._callback(null, 'removed video events');
     }
 
     ///////////////////// media source events ///////////////////////////
@@ -240,19 +267,6 @@ class VideoPlayer {
         this._socket.addEventListener('segment', this.onSegment, {capture: true, passive: true, once: false});
         this._socket.send('segments');
         //this._video.muted = true;
-        if ('Promise' in window) {
-            this._video.play()
-                .then(() => {
-                    //this._callback(null, 'play promise fulfilled');
-                    //todo remove "click to play" poster
-                })
-                .catch((error) => {
-                    this._callback(error);
-                    //todo add "click to play" poster
-                });
-        } else {
-            this._video.play();
-        }
     }
 
     _addMediaSourceEvents() {
