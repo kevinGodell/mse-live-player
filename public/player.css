@@ -1,3 +1,7 @@
+/* bug: pseudo selectors for :fullscreen, :-moz-full-screen, and :-webkit-full-screen cannot be grouped together */
+
+/* styles for container div */
+
 div.mse-container {
     position: relative;
     float: left;
@@ -5,8 +9,6 @@ div.mse-container {
     background: linear-gradient(black, grey, black);
     border: 1px solid white;
 }
-
-/* bug: pseudo selectors for :fullscreen, :-moz-full-screen, and :-webkit-full-screen cannot be grouped together */
 
 div.mse-container:fullscreen {
     width: 100%;
@@ -23,25 +25,34 @@ div.mse-container:-webkit-full-screen {
     height: 100%;
 }
 
+div.mse-container.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* styles for video */
+
 video.mse-video {
     pointer-events: none;
     cursor: none;
 }
 
-div.mse-container:fullscreen video.mse-video {
+div.mse-container:fullscreen video {
     width: 100%;
     height: 100%;
 }
 
-div.mse-container:-moz-full-screen video.mse-video {
+div.mse-container:-moz-full-screen video {
     width: 100%;
     height: 100%;
 }
 
-div.mse-container:-webkit-full-screen video.mse-video {
+div.mse-container:-webkit-full-screen video {
     width: 100%;
     height: 100%;
 }
+
+/* styles for controls div */
 
 div.mse-controls {
     position: absolute;
@@ -59,7 +70,36 @@ div.mse-controls:hover {
     opacity: 0.8;
 }
 
-div.mse-controls button {
+div.mse-container:fullscreen div {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+div.mse-container:-moz-full-screen div {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+div.mse-container:-webkit-full-screen div {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+/* styles for buttons */
+
+div.mse-container button {
     background-color: transparent;
     border: none;
     outline: none;
@@ -70,16 +110,32 @@ div.mse-controls button {
     margin: 1px;
 }
 
-div.mse-controls button:hover {
+div.mse-container button:hover {
     opacity: 1;
 }
 
-div.mse-controls button:active {
+div.mse-container button:active {
     opacity: 0.6;
 }
 
-button.mse-start, button.mse-stop {
+div.mse-container:fullscreen button {
+    font-size: 32px;
+}
+
+div.mse-container:-moz-full-screen button {
+    font-size: 32px;
+}
+
+div.mse-container:-webkit-full-screen button {
+    font-size: 32px;
+}
+
+button.mse-start, button.mse-stop, button.mse-snapshot {
     float: left;
+}
+
+button.mse-fullscreen, button.mse-cycle {
+    float: right;
 }
 
 button.mse-start:before {
@@ -92,57 +148,9 @@ button.mse-stop:before {
     content: "\f04d";
 }
 
-button.mse-fullscreen, button.mse-snapshot {
-    float: right;
-}
-
-div.mse-container:fullscreen div.mse-controls {
-    border: 2px solid white;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    padding: 6px;
-    border-radius: 10px;
-}
-
-div.mse-container:-moz-full-screen div.mse-controls {
-    border: 2px solid white;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    padding: 6px;
-    border-radius: 10px;
-}
-
-div.mse-container:-webkit-full-screen div.mse-controls {
-    border: 2px solid white;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    padding: 6px;
-    border-radius: 10px;
-}
-
-div.mse-container:fullscreen button {
-    font-size: 32px;
-}
-
-div.mse-container:-moz-full-screen button {
-    font-size: 32px;
-}
-
-div.mse-container:-moz-full-screen button.mse-fullscreen:before {
+button.mse-snapshot:before {
     font-family: FontAwesome;
-    content: "\f066";
-}
-
-div.mse-container:-webkit-full-screen button {
-    font-size: 32px;
-}
-
-div.mse-container:-webkit-full-screen button.mse-fullscreen:before {
-    font-family: FontAwesome;
-    content: "\f066";
+    content: "\f030";
 }
 
 button.mse-fullscreen:before {
@@ -150,7 +158,56 @@ button.mse-fullscreen:before {
     content: "\f065";
 }
 
-button.mse-snapshot:before {
+button.mse-stop.cycling {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.2;
+}
+
+div.mse-container:-moz-full-screen button.mse-fullscreen:before {
     font-family: FontAwesome;
-    content: "\f030";
+    content: "\f066";
+}
+
+div.mse-container:-webkit-full-screen button.mse-fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f066";
+}
+
+button.mse-cycle:before {
+    font-family: FontAwesome;
+    content: "\f021";/* other cycle icon options : f021 f110 f01e f1ce */
+}
+
+button.mse-cycle.animated {
+    -webkit-animation: spin 5s linear infinite;
+    animation: spin 5s linear infinite;
+}
+
+/* SPIN animation for cycle button */
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(359deg);
+        -ms-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
 }

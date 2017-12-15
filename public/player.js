@@ -31,11 +31,12 @@ class VideoPlayer {
         }
         this._video = options.video;
         if (options.controls) {
-            const ssb = options.controls.indexOf('startstop') !== -1;
-            const fsb = options.controls.indexOf('fullscreen') !== -1;
+            const stb = options.controls.indexOf('startstop') !== -1;
+            const fub = options.controls.indexOf('fullscreen') !== -1;
             const snb = options.controls.indexOf('snapshot') !== -1;
+            const cyb = options.controls.indexOf('cycle') !== -1;
             //todo: mute and volume will be determined automatically
-            if (ssb || fsb || snb) {
+            if (stb || fub || snb || cyb) {
                 this._container = document.createElement('div');
                 this._container.className = 'mse-container';
                 this._video.parentNode.replaceChild(this._container, this._video);
@@ -46,7 +47,7 @@ class VideoPlayer {
                 this._controls = document.createElement('div');
                 this._controls.className = 'mse-controls';
                 this._container.appendChild(this._controls);
-                if (ssb) {
+                if (stb) {
                     this._startstop = document.createElement('button');
                     this._startstop.className = 'mse-start';
                     this._startstop.addEventListener('click', (event) => {
@@ -54,7 +55,7 @@ class VideoPlayer {
                     });
                     this._controls.appendChild(this._startstop);
                 }
-                if (fsb) {
+                if (fub) {
                     this._fullscreen = document.createElement('button');
                     this._fullscreen.className = 'mse-fullscreen';
                     this._fullscreen.addEventListener('click', (event) => {
@@ -110,11 +111,115 @@ class VideoPlayer {
                     });
                     this._controls.appendChild(this._snapshot);
                 }
+                if (cyb) {
+                    this._cycle = document.createElement('button');
+                    this._cycle.className = 'mse-cycle';
+                    this._cycling = false;
+                    if (options.cycleTime) {
+                        const int = parseInt(options.cycleTime);
+                        if (int < 2) {
+                            this._cycleTime = 2000;
+                        } else if (int > 10) {
+                            this._cycleTime = 10000;
+                        } else {
+                            this._cycleTime = int * 1000;
+                        }
+                    } else {
+                        this._cycleTime = 2000;
+                    }
+                    this._cycle.addEventListener('click', (event) => {
+                        if (!this._cycling) {
+                            this._namespaces = [];
+                            this._cycleIndex = 0;
+                            const videoPlayers = window.videoPlayers;
+                            for(let i = 0; i < videoPlayers.length; i++) {
+                                this._namespaces.push(videoPlayers[i].namespace);
+                                if (videoPlayers[i].namespace !== this._namespace) {
+                                    videoPlayers[i].disabled = true;
+                                } else {
+                                    this._cycleIndex = i;
+                                }
+                            }
+                            if (this._namespaces.length < 2) {
+                                this._callback(null, 'unable to cycle because namespaces < 2');
+                                delete this._namespaces;
+                                delete this._cycleIndex;
+                                return;
+                            }
+                            if (!this._playing) {
+                                this.start();
+                            }
+                            if (this._startstop) {
+                                this._startstop.classList.add('cycling');
+                            }
+                            this._cycle.classList.add('animated');
+                            this._cycleInterval = setInterval(()=> {
+                                this._cycleIndex++;
+                                if (this._cycleIndex === this._namespaces.length) {
+                                    this._cycleIndex = 0;
+                                }
+                                this.start(this._namespaces[this._cycleIndex]);
+                            }, this._cycleTime);
+                            this._cycling = true;
+                        } else {
+                            clearInterval(this._cycleInterval);
+                            this._cycle.classList.remove('animated');
+                            if (this._startstop) {
+                                this._startstop.classList.remove('cycling');
+                            }
+                            this.start();
+                            const videoPlayers = window.videoPlayers;
+                            for(let i = 0; i < videoPlayers.length; i++) {
+                                if (videoPlayers[i]._namespace !== this._namespace) {
+                                    videoPlayers[i].disabled = false;
+                                }
+                            }
+                            delete this._namespaces;
+                            delete this._cycleInterval;
+                            this._cycling = false;
+                        }
+                    });
+                    this._controls.appendChild(this._cycle);
+                }
             }
         }
         this._namespace = options.namespace;
         this._io = options.io;
         return this;
+    }
+
+    get namespace() {
+        return this._namespace || null;
+    }
+
+    set namespace(value) {
+        this._namespace = value;
+    }
+
+    get disabled() {
+        if (!this._container) {
+            return false;
+        }
+        return this._container.classList.contains('disabled');
+    }
+
+    set disabled(value) {
+        if (!this._container) {
+            return;
+        }
+        if (value === true) {
+            if (this._container.classList.contains('disabled')) {
+                return;
+            }
+            this._container.classList.add('disabled');
+            this.stop();
+        } else {
+            if (!this._container.classList.contains('disabled')) {
+                return;
+            }
+            this._container.classList.remove('disabled');
+            this.start();
+        }
     }
 
     ////////////////////////// public methods ////////////////////////////
@@ -141,17 +246,21 @@ class VideoPlayer {
         return this;
     }
 
-    start() {
+    start(namespace) {
+        if (!namespace) {
+            namespace = this._namespace;
+        }
+        //todo maybe pass namespace as parameter to start(namespace) to accommodate cycling feature
         if (this._playing === true) {
             this.stop();
         }
         if (this._startstop) {
-            this._startstop.className = 'mse-stop';
+            this._startstop.classList.add('mse-stop');
+            this._startstop.classList.remove('mse-start');
             this._startstop.disabled = true;
         }
         this._playing = true;
-        this._addVideoEvents();
-        this._socket = this._io(`${location.origin}/${this._namespace}`, {transports: ['websocket'], forceNew: false});
+        this._socket = this._io(`${location.origin}/${namespace}`, {transports: ['websocket'], forceNew: false});
         this._addSocketEvents();
         if (this._startstop) {
             this._startstop.disabled = false;
@@ -161,7 +270,8 @@ class VideoPlayer {
 
     stop() {
         if (this._startstop) {
-            this._startstop.className = 'mse-start';
+            this._startstop.classList.add('mse-start');
+            this._startstop.classList.remove('mse-stop');
             this._startstop.disabled = true;
         }
         this._playing = false;
@@ -378,6 +488,7 @@ class VideoPlayer {
         this._init = data;
         this._mediaSource = new MediaSource();
         this._addMediaSourceEvents();
+        this._addVideoEvents();
         this._video.src = URL.createObjectURL(this._mediaSource);
     }
 
