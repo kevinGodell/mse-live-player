@@ -15,6 +15,11 @@ div.mse-container:fullscreen {
     height: 100%;
 }
 
+div.mse-container:-ms-fullscreen {
+    width: 100%;
+    height: 100%;
+}
+
 div.mse-container:-moz-full-screen {
     width: 100%;
     height: 100%;
@@ -38,6 +43,11 @@ video.mse-video {
 }
 
 div.mse-container:fullscreen video {
+    width: 100%;
+    height: 100%;
+}
+
+div.mse-container:-ms-fullscreen video {
     width: 100%;
     height: 100%;
 }
@@ -71,6 +81,15 @@ div.mse-controls:hover {
 }
 
 div.mse-container:fullscreen div {
+    border: 2px solid white;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+div.mse-container:-ms-fullscreen div {
     border: 2px solid white;
     left: 10px;
     right: 10px;
@@ -122,6 +141,10 @@ div.mse-container:fullscreen button {
     font-size: 32px;
 }
 
+div.mse-container:-ms-fullscreen button {
+    font-size: 32px;
+}
+
 div.mse-container:-moz-full-screen button {
     font-size: 32px;
 }
@@ -160,8 +183,18 @@ button.mse-fullscreen:before {
 
 button.mse-stop.cycling {
     pointer-events: none;
-    cursor: not-allowed;
+    cursor: none;
     opacity: 0.2;
+}
+
+div.mse-container:fullscreen button.mse-fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f066";
+}
+
+div.mse-container:-ms-fullscreen button.mse-fullscreen:before {
+    font-family: FontAwesome;
+    content: "\f066";
 }
 
 div.mse-container:-moz-full-screen button.mse-fullscreen:before {
