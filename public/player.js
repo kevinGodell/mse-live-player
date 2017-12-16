@@ -35,7 +35,7 @@ class VideoPlayer {
             const fub = options.controls.indexOf('fullscreen') !== -1;
             const snb = options.controls.indexOf('snapshot') !== -1;
             const cyb = options.controls.indexOf('cycle') !== -1;
-            //todo: mute and volume will be determined automatically
+            //todo: mute and volume buttons will be determined automatically based on codec
             if (stb || fub || snb || cyb) {
                 this._container = document.createElement('div');
                 this._container.className = 'mse-container';
@@ -91,7 +91,7 @@ class VideoPlayer {
                             this._callback(null, `readyState: ${this._video.readyState} < 2`);
                             return;
                         }
-                        //safari bug, cannot use video for drawImage when it is being used as media source extension (only works when using regular m3u8 playlist)
+                        //safari bug, cannot use video as source for canvas drawImage when it is being used as media source extension (only works when using regular m3u8 playlist)
                         //will hide icon until creating a server side response to deliver a snapshot
                         const canvas = document.createElement("canvas");
                         //this._container.appendChild(canvas);
@@ -134,7 +134,7 @@ class VideoPlayer {
                             const videoPlayers = window.videoPlayers;
                             for(let i = 0; i < videoPlayers.length; i++) {
                                 this._namespaces.push(videoPlayers[i].namespace);
-                                if (videoPlayers[i].namespace !== this._namespace) {
+                                if (videoPlayers[i] !== this) {
                                     videoPlayers[i].disabled = true;
                                 } else {
                                     this._cycleIndex = i;
@@ -170,7 +170,7 @@ class VideoPlayer {
                             this.start();
                             const videoPlayers = window.videoPlayers;
                             for(let i = 0; i < videoPlayers.length; i++) {
-                                if (videoPlayers[i]._namespace !== this._namespace) {
+                                if (videoPlayers[i] !== this) {
                                     videoPlayers[i].disabled = false;
                                 }
                             }
@@ -185,6 +185,12 @@ class VideoPlayer {
         }
         this._namespace = options.namespace;
         this._io = options.io;
+        
+        if (!window.videoPlayers) {
+            window.videoPlayers = [];
+        }
+        window.videoPlayers.push(this);
+        
         return this;
     }
 
@@ -550,7 +556,7 @@ class VideoPlayer {
     const videos = document.getElementsByTagName('video');
 
     //array to keep reference to newly created VideoPlayers, maybe could be a keyed object
-    const videoPlayers = [];
+    //const videoPlayers = [];
 
     for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
@@ -560,15 +566,14 @@ class VideoPlayer {
             if (video.autoplay) {
                 videoPlayer.start();
             }
-            videoPlayers.push(videoPlayer);
+            //videoPlayers.push(videoPlayer);
         }
     }
 
     //make videoPlayers accessible
-    window.videoPlayers = videoPlayers;
+    //window.videoPlayers = videoPlayers;
 
 })(window);
-
 
 //todo steps for creation of video player
 //script is loaded at footer so that it can run after html is ready on page
