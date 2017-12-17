@@ -6,53 +6,77 @@
     <link href='/public/player.css' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <style>
-        div {
+        div.block {
             float: left;
             text-align: center;
+            border: 1px solid black;
+            margin: 1px;
+            padding: 2px;
+            width: 19vw;
+        }
+        video {
+            width: 100%;
         }
     </style>
 </head>
 <body>
-<div>
-    <h4>video player using progressive mp4</h4>
-    <video controls autoplay width="320" height="240" src="/starbucks.mp4"></video>
+
+<div class="block">
+    <p>video player using progressive mp4 (will not work in safari)</p>
+    <video controls autoplay src="/starbucks.mp4"></video>
 </div>
 
-<div>
-    <h4>media source extensions manual</h4>
-    <video width="320" height="240" id="starbucks"></video>
+<div class="block">
+    <p>video player using m3u8 playlist (native in safari only, osx and ios)</p>
+    <video controls autoplay src="/starbucks.m3u8"></video>
 </div>
 
-<div>
-    <h4>media source extensions automatic</h4>
-    <video autoplay width="320" height="240" data-namespace="starbucks" data-controls="startstop|fullscreen|snapshot|cycle"></video>
+<div class="block">
+    <p>media source extensions manual (most browsers, except ios mobile)</p>
+    <video id="starbucks"></video>
 </div>
 
-<div>
-    <a href="rtsp://131.95.3.162:554/axis-media/media.3gp">vlc link</a>
-    <a href="/starbucks.mp4">src link</a>
+<div class="block">
+    <p>media source extensions automatic (most browsers, except ios mobile)</p>
+    <video autoplay data-namespace="starbucks" data-controls="startstop|fullscreen|snapshot|cycle"></video>
+</div>
+
+<div class="block">
+    <a href="rtsp://131.95.3.162:554/axis-media/media.3gp">original source</a>
+    <br/>
+    <a href="/starbucks.mp4">src starbucks.mp4</a>
+    <br/>
+    <a href="/starbucks.m3u8">src starbucks.m3u8</a>
 </div>
 
 <hr style="clear: both;"/>
 
-<div>
-    <h4>video player using progressive mp4</h4>
-    <video controls autoplay width="320" height="240" src="pool.mp4"></video>
+<div class="block">
+    <p>video player using progressive mp4 (will not work in safari)</p>
+    <video controls autoplay src="/pool.mp4"></video>
 </div>
 
-<div>
-    <h4>media source extensions manual</h4>
-    <video width="320" height="240" id="pool"></video>
+<div class="block">
+    <p>video player using m3u8 playlist (native in safari only, osx and ios)</p>
+    <video controls autoplay src="/pool.m3u8"></video>
 </div>
 
-<div>
-    <h4>media source extensions automatic</h4>
-    <video autoplay width="320" height="240" data-namespace="pool" data-controls="startstop|fullscreen|snapshot|cycle"></video>
+<div class="block">
+    <p>media source extensions manual (most browsers, except ios mobile)</p>
+    <video id="pool"></video>
 </div>
 
-<div>
-    <a href="rtsp://216.4.116.29:554/axis-media/media.3gp">vlc link</a>
-    <a href="/pool.mp4">src link</a>
+<div class="block">
+    <p>media source extensions automatic (most browsers, except ios mobile)</p>
+    <video autoplay data-namespace="pool" data-controls="startstop|fullscreen|snapshot|cycle"></video>
+</div>
+
+<div class="block">
+    <a href="rtsp://216.4.116.29:554/axis-media/media.3gp">original source</a>
+    <br/>
+    <a href="/pool.mp4">src pool.mp4</a>
+    <br/>
+    <a href="/pool.m3u8">src pool.m3u8</a>
 </div>
 
 <script src="/socket.io/socket.io.js">//must be included before player.js because socket.io is used for transport</script>

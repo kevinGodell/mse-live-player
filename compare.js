@@ -18,13 +18,17 @@ const database = [
         id: 'starbucks',
         name: 'starbucks coffee',
         params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'ignore']}
+        options: {stdio : ['ignore', 'pipe', 'ignore']},
+        hlsBase: 'starbucks',
+        hlsListSize: 3
     },
     {
         id: 'pool',
         name: 'resort pool',
         params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://216.4.116.29:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
-        options: {stdio : ['ignore', 'pipe', 'ignore']}
+        options: {stdio : ['ignore', 'pipe', 'ignore']},
+        hlsBase: 'pool',
+        hlsListSize: 3
     }
 ];
 
@@ -32,9 +36,10 @@ const streams = {};
 
 for (let i = 0; i < database.length; i++) {
     //create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
-    const mp4segmenter = new Mp4Segmenter();
+    const mp4segmenter = new Mp4Segmenter({hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize});
     //spawn ffmpeg with stream info and pipe to mp4segmenter
     const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
+    //todo monitor ffmpeg and respawn if necessary
         .on('error', (error) => {
             console.log(database[i].name, 'error', error);
         })
@@ -151,6 +156,37 @@ for (let i = 0; i < database.length; i++) {
             });
 
         });
+
+    if (database[i].hlsBase) {
+
+        app.get(`/${database[i].hlsBase}.m3u8`, (req, res) => {
+            if (mp4segmenter.m3u8) {
+                res.writeHead(200, {'Content-Type': 'application/vnd.apple.mpegurl'});
+                res.end(mp4segmenter.m3u8);
+            } else {
+                res.sendStatus(503);//todo maybe send 400
+            }
+        });
+
+        app.get(`/init-${database[i].hlsBase}.mp4`, (req, res) => {
+            if (mp4segmenter.initialization) {
+                res.writeHead(200, {'Content-Type': 'video/mp4'});
+                res.end(mp4segmenter.initialization);
+            } else {
+                res.sendStatus(503);
+            }
+        });
+
+        app.get(`/${database[i].hlsBase}:id.m4s`, (req, res) => {
+            const segment = mp4segmenter.getHlsSegment(req.params.id);
+            if (segment) {
+                res.writeHead(200, {'Content-Type': 'video/mp4'});
+                res.end(segment);
+            } else {
+                res.sendStatus(503);
+            }
+        });
+    }
 }
 
 //streams are available via streams['abc'] or streams.abc where 'abc' is the assigned id
