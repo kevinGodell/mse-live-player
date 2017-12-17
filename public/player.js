@@ -35,7 +35,7 @@ class VideoPlayer {
             const fub = options.controls.indexOf('fullscreen') !== -1;
             const snb = options.controls.indexOf('snapshot') !== -1;
             const cyb = options.controls.indexOf('cycle') !== -1;
-            //todo: mute and volume buttons will be determined automatically based on codec
+            //todo: mute and volume buttons will be determined automatically based on codec string
             if (stb || fub || snb || cyb) {
                 this._container = document.createElement('div');
                 this._container.className = 'mse-container';
@@ -185,12 +185,10 @@ class VideoPlayer {
         }
         this._namespace = options.namespace;
         this._io = options.io;
-        
         if (!window.videoPlayers) {
             window.videoPlayers = [];
         }
         window.videoPlayers.push(this);
-        
         return this;
     }
 
