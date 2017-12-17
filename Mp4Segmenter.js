@@ -10,6 +10,22 @@ class Mp4Segmenter extends Transform {
             this._callback = callback;
         }
         this._parseChunk = this._findFtyp;
+        if (options) {
+            if (options.hasOwnProperty('hlsListSize') && options.hasOwnProperty('hlsBase') && options.hlsBase) {
+                console.log('has own property');
+                const hlsListSize = parseInt(options.hlsListSize);
+                if (isNaN(hlsListSize) || hlsListSize < 2) {
+                    this._hlsListSize = 2;
+                } else if (hlsListSize > 10) {
+                    this._hlsListSize = 10;
+                } else {
+                    this._hlsListSize = hlsListSize;
+                }
+                this._hlsList = [];
+                this._hlsBase = options.hlsBase;
+                this._sequence = 0;
+            }
+        }
     }
     
     get mime() {
@@ -24,8 +40,33 @@ class Mp4Segmenter extends Transform {
         return this._segment || null;
     }
     
-    get segmentTimestamp() {
-        return this._segmentTimestamp || null;
+    get timestamp() {
+        return this._timestamp || null;
+    }
+    
+    get duration() {
+        return this._duration || null;
+    }
+
+    get m3u8() {
+        return this._m3u8 || null;
+    }
+    
+    get sequence() {
+        return this._sequence || null;
+    }
+
+    getHlsSegment(sequence) {
+        if (!this._hlsList) {
+            return null;
+        }
+        let segment = null;
+        for (let i = 0; i < this._hlsList.length; i++) {
+            if (this._hlsList[i].sequence === sequence) {
+                segment = this._hlsList[i].segment;
+            }
+        }
+        return segment;
     }
 
     _findFtyp(chunk) {
@@ -83,6 +124,7 @@ class Mp4Segmenter extends Transform {
         }
         index += 5;
         this._mime = `video/mp4; codecs="avc1.${this._initialization.slice(index , index + 3).toString('hex').toUpperCase()}${audioString}"`;
+        this._timestamp = Date.now();
         this.emit('initialized');
     }
 
@@ -124,7 +166,25 @@ class Mp4Segmenter extends Transform {
 
     _setSegment(chunk) {
         this._segment = chunk;
-        this._segmentTimestamp = Date.now();
+        const currentTime = Date.now();
+        this._duration = (currentTime - this._timestamp) / 1000;
+        this._timestamp = currentTime;
+        if (this._hlsList) {
+            this._hlsList.push({sequence: String(this._sequence++), segment: this._segment, duration: this._duration});
+            while (this._hlsList.length > this._hlsListSize) {
+                this._hlsList.shift();
+            }
+            let m3u8 = '#EXTM3U\n';
+            m3u8 += '#EXT-X-VERSION:7\n';
+            m3u8 += `#EXT-X-TARGETDURATION:${Math.round(this._duration)}\n`;
+            m3u8 += `#EXT-X-MEDIA-SEQUENCE:${this._hlsList[0].sequence}\n`;
+            m3u8 += `#EXT-X-MAP:URI="init-${this._hlsBase}.mp4"\n`;
+            for(let i = 0; i < this._hlsList.length; i++) {
+                m3u8 += `#EXTINF:${Math.round(this._hlsList[i].duration).toFixed(6)},\n`;
+                m3u8 += `${this._hlsBase}${this._hlsList[i].sequence}.m4s\n`;
+            }
+            this._m3u8 = m3u8;
+        }
     }
     
     _findMdat(chunk) {
@@ -210,7 +270,8 @@ class Mp4Segmenter extends Transform {
         delete this._mime;
         delete this._initialization;
         delete this._segment;
-        delete this._segmentTimestamp;
+        delete this._timestamp;
+        delete this._duration;
         delete this._moof;
         delete this._mdatBuffer;
         delete this._moofLength;
@@ -218,6 +279,11 @@ class Mp4Segmenter extends Transform {
         delete this._mdatBufferSize;
         delete this._ftyp;
         delete this._ftypLength;
+        delete this._m3u8;
+        if (this._hlsList) {
+            this._hlsList = [];
+            this._sequence = 0;
+        }
         callback();
     }
 }
