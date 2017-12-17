@@ -12,7 +12,6 @@ class Mp4Segmenter extends Transform {
         this._parseChunk = this._findFtyp;
         if (options) {
             if (options.hasOwnProperty('hlsListSize') && options.hasOwnProperty('hlsBase') && options.hlsBase) {
-                console.log('has own property');
                 const hlsListSize = parseInt(options.hlsListSize);
                 if (isNaN(hlsListSize) || hlsListSize < 2) {
                     this._hlsListSize = 2;
