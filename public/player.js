@@ -6,7 +6,7 @@
 
 class VideoPlayer {
     constructor(options, callback) {
-        if (typeof callback === 'function') {
+        if (typeof callback === 'function' && callback.length === 2) {
             this._callback = callback;
         } else {
             this._callback = (err, msg) => {
