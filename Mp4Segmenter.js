@@ -124,6 +124,15 @@ class Mp4Segmenter extends Transform {
         index += 5;
         this._mime = `video/mp4; codecs="avc1.${this._initialization.slice(index , index + 3).toString('hex').toUpperCase()}${audioString}"`;
         this._timestamp = Date.now();
+        if (this._hlsList) {
+            let m3u8 = '#EXTM3U\n';
+            m3u8 += '#EXT-X-VERSION:7\n';
+            m3u8 += '#EXT-X-ALLOW-CACHE:NO\n';
+            m3u8 += `#EXT-X-TARGETDURATION:0\n`;
+            m3u8 += `#EXT-X-MEDIA-SEQUENCE:0\n`;
+            m3u8 += `#EXT-X-MAP:URI="init-${this._hlsBase}.mp4"\n`;
+            this._m3u8 = m3u8;
+        }
         this.emit('initialized');
     }
 
@@ -174,12 +183,13 @@ class Mp4Segmenter extends Transform {
                 this._hlsList.shift();
             }
             let m3u8 = '#EXTM3U\n';
-            m3u8 += '#EXT-X-VERSION:6\n';
+            m3u8 += '#EXT-X-VERSION:7\n';
+            m3u8 += '#EXT-X-ALLOW-CACHE:NO\n';
             m3u8 += `#EXT-X-TARGETDURATION:${Math.round(this._duration)}\n`;
             m3u8 += `#EXT-X-MEDIA-SEQUENCE:${this._hlsList[0].sequence}\n`;
             m3u8 += `#EXT-X-MAP:URI="init-${this._hlsBase}.mp4"\n`;
             for(let i = 0; i < this._hlsList.length; i++) {
-                m3u8 += `#EXTINF:${Math.round(this._hlsList[i].duration).toFixed(6)},\n`;
+                m3u8 += `#EXTINF:${this._hlsList[i].duration},\n`;
                 m3u8 += `${this._hlsBase}${this._hlsList[i].sequence}.m4s\n`;
             }
             this._m3u8 = m3u8;
