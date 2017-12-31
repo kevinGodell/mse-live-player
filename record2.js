@@ -8,13 +8,13 @@ const Mp4Segmenter = require('mp4frag');
 
 const fs = require('fs');
 
-const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//bufferSize = number of media segments of past video to store
+const mp4segmenter = new Mp4Segmenter({bufferSize: 3})//bufferSize = number of media segments of past video to store
     .on('initialized', () => {
         console.log('initialized');
     });
 
 const ffmpegSource = spawn('ffmpeg', [
-    '-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://216.4.116.29:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 216.4.116.29"', '-reset_timestamps', '1', 'pipe:1'
+    '-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.22:554/user=admin_password=pass_channel=1_stream=1.sdp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 192.168.1.22"', '-reset_timestamps', '1', 'pipe:1'
 ])
     .on('error', (error) => {
         console.log('error', error);
@@ -37,22 +37,28 @@ setTimeout(()=> {
     //write the saved segments
     writeStream.write(mp4segmenter.buffer);
 
+    mp4segmenter.pipe(writeStream);
+
+    /*
     //write the fresh segments
     function onSegment(segment) {
         writeStream.write(segment);
     }
 
     mp4segmenter.on('segment', onSegment);
+    */
     
     //create a timer to remove listener and close file being written
     //todo reset timeout if motion is still occurring before timout completes
     setTimeout(() => {
 
         //remove event lister here
-        mp4segmenter.removeListener('segment', onSegment);
+        //mp4segmenter.removeListener('segment', onSegment);
+        
+        mp4segmenter.unpipe(writeStream);
         
         writeStream.end();
         
         console.log('file should be complete');
     }, 20000);
-}, 10000);
+}, 20000);
