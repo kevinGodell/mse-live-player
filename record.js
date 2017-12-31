@@ -53,17 +53,24 @@ setTimeout(()=> {
     }
     
     //start piping live segments to continue recording
-    mp4segmenter.pipe(recorder.stdio[0]);
+    //mp4segmenter.pipe(recorder.stdio[0]);
+
+    mp4segmenter.on('segment', (segment) => {
+        recorder.stdio[0].write(segment);
+    });
     
     //create a timer to cancel ffmpeg process
     //todo reset timeout if motion is still occurring before timout completes
     setTimeout((proc) => {
-        mp4segmenter.unpipe(recorder.stdio[0]);
+        //mp4segmenter.unpipe(recorder.stdio[0]);
         //needs work, seems like process finalizes mp4 but process stays open on mac
-        console.log(recorder.pid);
-        process.kill(recorder.pid);
-        recorder.kill();
-        recorder = null;
+        //console.log(recorder.pid);
+        //process.kill(recorder.pid);
+        //recorder.kill();
+        //recorder = null;
+
+        //does q work??
+        recorder.stdio[0].write('q');
         console.log('recorder should be dead');
     }, 20000);
 }, 10000);
