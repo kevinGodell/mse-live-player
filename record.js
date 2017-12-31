@@ -14,11 +14,11 @@ let initSegment = null;//populated in the initialized event
 
 const mp4segmenter = new Mp4Segmenter()//no need to pass options to it because not being used to generate m3u8 playlist
     .on('initialized', () => {
-        console.log('initialized');
+        //console.log('initialized');
         initSegment = mp4segmenter.initialization;
     })
     .on('segment', (segment) => {
-        console.log('segment');
+        //console.log('segment');
         bufferedVideo.push(segment);
         while (bufferedVideo.length > bufferedVideoLimit) {
             bufferedVideo.shift();//removes oldest segment in list
@@ -42,7 +42,11 @@ setTimeout(()=> {
     console.log('simulated motion trigger');
     
     //spawn new ffmpeg process to use as recorder
-    let recorder = spawn('ffmpeg', ['-f', 'mp4', '-i', 'pipe:0', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+faststart+frag_keyframe', `${Date.now()}.mp4`]);//tell ffmpeg that input is mp4 because it may not be able to guess correctly
+    let recorder = spawn(
+        'ffmpeg', 
+        ['-loglevel', 'debug', '-f', 'mp4', '-i', 'pipe:0', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+faststart+frag_keyframe', `${Date.now()}.mp4`],
+        {stdio : ['pipe', 'ignore', 'inherit']}
+    );//tell ffmpeg that input is mp4 because it may not be able to guess correctly
     
     //write the initialization segment first
     recorder.stdio[0].write(initSegment);
@@ -68,14 +72,17 @@ setTimeout(()=> {
     //todo reset timeout if motion is still occurring before timout completes
     setTimeout((proc) => {
         
+        //unpipe or will throw error if killing process while piping
         mp4segmenter.unpipe(recorder.stdio[0]);
 
         //remove event lister here
         //mp4segmenter.removeListener('segment', onSeg);
         
-        recorder.stdio[0].end('q');
+        //close writing to stdin should close process
+        recorder.stdio[0].end();
         
+        //remove reference
         recorder = null;
         console.log('recorder should be dead');
-    }, 20000);
+    }, 10000);
 }, 10000);
