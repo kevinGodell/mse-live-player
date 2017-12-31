@@ -51,18 +51,8 @@ setTimeout(()=> {
     //write the initialization segment first
     recorder.stdio[0].write(initSegment);
     
-    //loop throught the buffered segments in array and write them
-    //for (let i = 0; i < bufferedVideo.length; i++) {
-    //    recorder.stdio[0].write(bufferedVideo[i]);
-    //}
-    
-    const buffer = mp4segmenter.buffer;
-    if (buffer) {//make sure it is not null, just in case you triggered recording before buffer had time to be filled
-        
-        console.log('bfl', buffer.length);
-        
-        recorder.stdio[0].write(buffer);
-    }
+    //write the buffer of segments
+    recorder.stdio[0].write(mp4segmenter.buffer);
     
     //start piping live segments to continue recording
     mp4segmenter.pipe(recorder.stdio[0]);
