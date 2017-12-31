@@ -8,7 +8,7 @@ const Mp4Segmenter = require('mp4frag');
 
 const fs = require('fs');
 
-const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//no need to pass options to it because not being used to generate m3u8 playlist
+const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//bufferSize = number of media segments of past video to store
     .on('initialized', () => {
         console.log('initialized');
     });
