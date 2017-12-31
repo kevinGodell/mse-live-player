@@ -37,7 +37,7 @@ class Mp4Segmenter extends Transform {
             }
         }
     }
-    
+
     get mime() {
         return this._mime || null;
     }
@@ -45,15 +45,15 @@ class Mp4Segmenter extends Transform {
     get initialization() {
         return this._initialization || null;
     }
-    
+
     get segment() {
         return this._segment || null;
     }
-    
+
     get timestamp() {
         return this._timestamp || null;
     }
-    
+
     get duration() {
         return this._duration || null;
     }
@@ -61,18 +61,18 @@ class Mp4Segmenter extends Transform {
     get m3u8() {
         return this._m3u8 || null;
     }
-    
+
     get sequence() {
         return this._sequence || null;
     }
-    
+
     get buffer() {
         if (this._bufferList && this._bufferList.length > 0) {
             return Buffer.concat(this._bufferList);
         }
         return Buffer.alloc(0);
     }
-    
+
     getHlsSegment(sequence) {
         if (sequence && this._hlsList && this._hlsList.length > 0) {
             for (let i = 0; i < this._hlsList.length; i++) {
@@ -126,7 +126,7 @@ class Mp4Segmenter extends Transform {
             throw new Error('moovLength greater than chunkLength');
         }
     }
-    
+
     _parseMoov(value) {
         this._initialization = value;
         let audioString = '';
@@ -159,7 +159,7 @@ class Mp4Segmenter extends Transform {
             this._parseChunk(chunk.slice(index - 4));
         }
     }
-    
+
     _findMoof(chunk) {
         const chunkLength = chunk.length;
         if (chunkLength < 8 || chunk[4] !== 0x6D || chunk[5] !== 0x6F || chunk[6] !== 0x6F || chunk[7] !== 0x66) {
@@ -217,7 +217,7 @@ class Mp4Segmenter extends Transform {
             }
         }
     }
-    
+
     _findMdat(chunk) {
         if (this._mdatBuffer) {
             this._mdatBuffer.push(chunk);
