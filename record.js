@@ -12,18 +12,18 @@ const bufferedVideoLimit = 3;//removed oldest segments when array grows over len
 
 let initSegment = null;//populated in the initialized event
 
-const mp4segmenter = new Mp4Segmenter()//no need to pass options to it because not being used to generate m3u8 playlist
+const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//no need to pass options to it because not being used to generate m3u8 playlist
     .on('initialized', () => {
-        //console.log('initialized');
+        console.log('initialized');
         initSegment = mp4segmenter.initialization;
-    })
-    .on('segment', (segment) => {
+    });
+    /*.on('segment', (segment) => {
         //console.log('segment');
         bufferedVideo.push(segment);
         while (bufferedVideo.length > bufferedVideoLimit) {
             bufferedVideo.shift();//removes oldest segment in list
         }
-    });
+    });*/
 
 const ffmpegSource = spawn('ffmpeg', [
     '-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'
@@ -52,8 +52,16 @@ setTimeout(()=> {
     recorder.stdio[0].write(initSegment);
     
     //loop throught the buffered segments in array and write them
-    for (let i = 0; i < bufferedVideo.length; i++) {
-        recorder.stdio[0].write(bufferedVideo[i]);
+    //for (let i = 0; i < bufferedVideo.length; i++) {
+    //    recorder.stdio[0].write(bufferedVideo[i]);
+    //}
+    
+    const buffer = mp4segmenter.buffer;
+    if (buffer) {//make sure it is not null, just in case you triggered recording before buffer had time to be filled
+        
+        console.log('bfl', buffer.length);
+        
+        recorder.stdio[0].write(buffer);
     }
     
     //start piping live segments to continue recording
