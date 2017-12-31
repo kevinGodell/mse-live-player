@@ -8,24 +8,10 @@ const Mp4Segmenter = require('mp4frag');
 
 const fs = require('fs');
 
-const bufferedVideo = [];//will hold array of segments other than the init segment
-
-const bufferedVideoLimit = 3;//removed oldest segments when array grows over length 3
-
-let initSegment = null;//populated in the initialized event
-
 const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//no need to pass options to it because not being used to generate m3u8 playlist
     .on('initialized', () => {
         console.log('initialized');
-        initSegment = mp4segmenter.initialization;
     });
-    /*.on('segment', (segment) => {
-        //console.log('segment');
-        bufferedVideo.push(segment);
-        while (bufferedVideo.length > bufferedVideoLimit) {
-            bufferedVideo.shift();//removes oldest segment in list
-        }
-    });*/
 
 const ffmpegSource = spawn('ffmpeg', [
     '-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://216.4.116.29:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 216.4.116.29"', '-reset_timestamps', '1', 'pipe:1'
