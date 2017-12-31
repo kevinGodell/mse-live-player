@@ -70,7 +70,7 @@ class Mp4Segmenter extends Transform {
         if (this._bufferList && this._bufferList.length > 0) {
             return Buffer.concat(this._bufferList);
         }
-        return null;
+        return Buffer.alloc(0);
     }
     
     getHlsSegment(sequence) {
