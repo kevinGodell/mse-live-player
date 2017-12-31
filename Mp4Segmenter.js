@@ -24,6 +24,17 @@ class Mp4Segmenter extends Transform {
                 this._hlsBase = options.hlsBase;
                 this._sequence = 0;
             }
+            if (options.hasOwnProperty('bufferSize')) {
+                const bufferSize = parseInt(options.bufferSize);
+                if (isNaN(bufferSize) || bufferSize < 2) {
+                    this._bufferSize = 2;
+                } else if (bufferSize > 10) {
+                    this._bufferSize = 10;
+                } else {
+                    this._bufferSize = bufferSize;
+                }
+                this._bufferList = [];
+            }
         }
     }
     
@@ -54,18 +65,23 @@ class Mp4Segmenter extends Transform {
     get sequence() {
         return this._sequence || null;
     }
-
-    getHlsSegment(sequence) {
-        if (!this._hlsList) {
-            return null;
+    
+    get buffer() {
+        if (this._bufferList && this._bufferList.length > 0) {
+            return Buffer.concat(this._bufferList);
         }
-        let segment = null;
-        for (let i = 0; i < this._hlsList.length; i++) {
-            if (this._hlsList[i].sequence === sequence) {
-                segment = this._hlsList[i].segment;
+        return null;
+    }
+    
+    getHlsSegment(sequence) {
+        if (sequence && this._hlsList && this._hlsList.length > 0) {
+            for (let i = 0; i < this._hlsList.length; i++) {
+                if (this._hlsList[i].sequence === sequence) {
+                    return this._hlsList[i].segment;
+                }
             }
         }
-        return segment;
+        return null;
     }
 
     _findFtyp(chunk) {
@@ -194,6 +210,12 @@ class Mp4Segmenter extends Transform {
             }
             this._m3u8 = m3u8;
         }
+        if (this._bufferList) {
+            this._bufferList.push(this._segment);
+            while (this._bufferList.length > this._bufferSize) {
+                this._bufferList.shift();
+            }
+        }
     }
     
     _findMdat(chunk) {
@@ -292,6 +314,9 @@ class Mp4Segmenter extends Transform {
         if (this._hlsList) {
             this._hlsList = [];
             this._sequence = 0;
+        }
+        if (this._bufferList) {
+            this._bufferList = [];
         }
         callback();
     }
