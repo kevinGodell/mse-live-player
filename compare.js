@@ -10,7 +10,7 @@ const io = require('socket.io')(http/*, {origins: allowedOrigins}*/);
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = require('./Mp4Segmenter');
+const Mp4Segmenter = require('mp4frag');
 
 //simulated data pulled from db, will add sqlite later todo
 const database = [

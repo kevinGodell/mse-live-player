@@ -4,7 +4,7 @@
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = require('./Mp4Segmenter');
+const Mp4Segmenter = require('mp4frag');
 
 const bufferedVideo = [];//will hold array of segments other than the init segment
 
