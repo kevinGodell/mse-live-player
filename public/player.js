@@ -200,6 +200,7 @@ class VideoPlayer {
         this._namespace = value;
     }
 
+    /** @return {boolean}*/
     get disabled() {
         if (!this._container) {
             return false;
@@ -207,11 +208,12 @@ class VideoPlayer {
         return this._container.classList.contains('disabled');
     }
 
-    set disabled(value) {
+    /** @param {boolean} bool*/
+    set disabled(bool) {
         if (!this._container) {
             return;
         }
-        if (value === true) {
+        if (bool === true) {
             if (this._container.classList.contains('disabled')) {
                 return;
             }
