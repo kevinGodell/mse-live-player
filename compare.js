@@ -10,7 +10,7 @@ const io = require('socket.io')(http/*, {origins: allowedOrigins}*/);
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = require('mp4frag');
+const Mp4Frag = require('mp4frag');
 
 //simulated data pulled from db, will add sqlite later todo
 const database = [
@@ -36,8 +36,8 @@ const streams = {};
 
 for (let i = 0; i < database.length; i++) {
     //create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
-    const mp4segmenter = new Mp4Segmenter({hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize});
-    //spawn ffmpeg with stream info and pipe to mp4segmenter
+    const mp4frag = new Mp4Frag({hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize});
+    //spawn ffmpeg with stream info and pipe to mp4frag
     const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
     //todo monitor ffmpeg and respawn if necessary
         .on('error', (error) => {
@@ -46,9 +46,9 @@ for (let i = 0; i < database.length; i++) {
         .on('exit', (code, signal) => {
             console.log(database[i].name, 'exit', code, signal);
         })
-        .stdio[1].pipe(mp4segmenter);
+        .stdio[1].pipe(mp4frag);
 
-    streams[database[i].id] = {ffmpeg: ffmpeg, mp4segmenter: mp4segmenter};
+    streams[database[i].id] = {ffmpeg: ffmpeg, mp4frag: mp4frag};
 
     //generate the /namespaces for io to route video streams
     const namespace = `/${database[i].id}`;
@@ -60,8 +60,8 @@ for (let i = 0; i < database.length; i++) {
 
             //event listener
             const onInitialized = () => {
-                socket.emit('mime', mp4segmenter.mime);
-                mp4segmenter.removeListener('initialized', onInitialized);
+                socket.emit('mime', mp4frag.mime);
+                mp4frag.removeListener('initialized', onInitialized);
             };
 
             //event listener
@@ -72,53 +72,56 @@ for (let i = 0; i < database.length; i++) {
 
             //client request
             const mimeReq = () => {
-                if (mp4segmenter.mime) {
-                    console.log(`${namespace} : ${mp4segmenter.mime}`);
-                    socket.emit('mime', mp4segmenter.mime);
+                const mime = mp4frag.mime;
+                if (mime) {
+                    console.log(`${namespace} : ${mime}`);
+                    socket.emit('mime', mime);
                 } else {
-                    mp4segmenter.on('initialized', onInitialized);
+                    mp4frag.on('initialized', onInitialized);
                 }
             };
 
             //client request
             const initializationReq = () => {
-                socket.emit('initialization', mp4segmenter.initialization);
+                socket.emit('initialization', mp4frag.initialization);
             };
 
             //client request
             const segmentsReq = () => {
                 //send current segment first to start video asap
-                if (mp4segmenter.segment) {
-                    socket.emit('segment', mp4segmenter.segment);
+                const segment = mp4frag.segment;
+                if (segment) {
+                    socket.emit('segment', segment);
                 }
-                //add listener for segments being dispatched by mp4segmenter
-                mp4segmenter.on('segment', onSegment);
+                //add listener for segments being dispatched by mp4frag
+                mp4frag.on('segment', onSegment);
             };
 
             //client request
             const segmentReq = () => {
-                if (mp4segmenter.segment) {
-                    socket.emit('segment', mp4segmenter.segment);
+                const segment = mp4frag.segment;
+                if (segment) {
+                    socket.emit('segment', segment);
                 } else {
-                    mp4segmenter.once('segment', onSegment);
+                    mp4frag.once('segment', onSegment);
                 }
             };
 
             //client request
             const pauseReq = () => {//same as stop, for now. will need other logic todo
-                mp4segmenter.removeListener('segment', onSegment);
+                mp4frag.removeListener('segment', onSegment);
             };
 
             //client request
             const resumeReq = () => {//same as segment, for now. will need other logic todo
-                mp4segmenter.on('segment', onSegment);
+                mp4frag.on('segment', onSegment);
                 //may indicate that we are resuming from paused
             };
 
             //client request
             const stopReq = () => {
-                mp4segmenter.removeListener('segment', onSegment);
-                mp4segmenter.removeListener('initialized', onInitialized);
+                mp4frag.removeListener('segment', onSegment);
+                mp4frag.removeListener('initialized', onInitialized);
                 //stop might indicate that we will not request anymore data todo
             };
 
@@ -160,25 +163,27 @@ for (let i = 0; i < database.length; i++) {
     if (database[i].hlsBase) {
 
         app.get(`/${database[i].hlsBase}.m3u8`, (req, res) => {
-            if (mp4segmenter.m3u8) {
+            const m3u8 = mp4frag.m3u8;
+            if (m3u8) {
                 res.writeHead(200, {'Content-Type': 'application/vnd.apple.mpegurl'});
-                res.end(mp4segmenter.m3u8);
+                res.end(m3u8);
             } else {
                 res.sendStatus(503);//todo maybe send 400
             }
         });
 
         app.get(`/init-${database[i].hlsBase}.mp4`, (req, res) => {
-            if (mp4segmenter.initialization) {
+            const init = mp4frag.initialization;
+            if (init) {
                 res.writeHead(200, {'Content-Type': 'video/mp4'});
-                res.end(mp4segmenter.initialization);
+                res.end(init);
             } else {
                 res.sendStatus(503);
             }
         });
 
         app.get(`/${database[i].hlsBase}:id.m4s`, (req, res) => {
-            const segment = mp4segmenter.getHlsSegment(req.params.id);
+            const segment = mp4frag.getHlsSegment(req.params.id);
             if (segment) {
                 res.writeHead(200, {'Content-Type': 'video/mp4'});
                 res.end(segment);
@@ -208,31 +213,33 @@ app.get('/public/player.css', (req, res) => {
 });
 
 app.get('/starbucks.mp4', (req, res) => {
-    if (!streams.starbucks.mp4segmenter.initialization) {
+    const init = streams.starbucks.mp4frag.initialization;
+    if (!init) {
         //browser may have requested init segment before it was ready
         res.status(503);
         res.end('resource not ready');
     } else {
         res.status(200);
-        res.write(streams.starbucks.mp4segmenter.initialization);
-        streams.starbucks.mp4segmenter.pipe(res);
+        res.write(init);
+        streams.starbucks.mp4frag.pipe(res);
         res.on('close', () => {
-            streams.starbucks.mp4segmenter.unpipe(res);
+            streams.starbucks.mp4frag.unpipe(res);
         });
     }
 });
 
 app.get('/pool.mp4', (req, res) => {
-    if (!streams.pool.mp4segmenter.initialization) {
+    const init = streams.pool.mp4frag.initialization;
+    if (!init) {
         //browser may have requested init segment before it was ready
         res.status(503);
         res.end('resource not ready');
     } else {
         res.status(200);
-        res.write(streams.pool.mp4segmenter.initialization);
-        streams.pool.mp4segmenter.pipe(res);
+        res.write(init);
+        streams.pool.mp4frag.pipe(res);
         res.on('close', () => {
-            streams.pool.mp4segmenter.unpipe(res);
+            streams.pool.mp4frag.unpipe(res);
         });
     }
 });

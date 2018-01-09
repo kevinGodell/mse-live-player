@@ -4,26 +4,12 @@
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = require('mp4frag');
+const Mp4Frag = require('mp4frag');
 
-const bufferedVideo = [];//will hold array of segments other than the init segment
-
-const bufferedVideoLimit = 3;//removed oldest segments when array grows over length 3
-
-let initSegment = null;//populated in the initialized event
-
-const mp4segmenter = new Mp4Segmenter({bufferSize: 5})//no need to pass options to it because not being used to generate m3u8 playlist
-    .on('initialized', () => {
+const mp4frag = new Mp4Frag({bufferListSize: 5})
+    .once('initialized', () => {
         console.log('initialized');
-        initSegment = mp4segmenter.initialization;
     });
-    /*.on('segment', (segment) => {
-        //console.log('segment');
-        bufferedVideo.push(segment);
-        while (bufferedVideo.length > bufferedVideoLimit) {
-            bufferedVideo.shift();//removes oldest segment in list
-        }
-    });*/
 
 const ffmpegSource = spawn('ffmpeg', [
     '-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'
@@ -34,7 +20,7 @@ const ffmpegSource = spawn('ffmpeg', [
     .on('exit', (code, signal) => {
         console.log('exit', code, signal);
     })
-    .stdio[1].pipe(mp4segmenter);
+    .stdio[1].pipe(mp4frag);
 
 
 //simulate a motion trigger that occurs at later point in time
@@ -46,35 +32,20 @@ setTimeout(()=> {
         'ffmpeg', 
         ['-loglevel', 'debug', '-f', 'mp4', '-i', 'pipe:0', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+faststart+frag_keyframe', `${Date.now()}.mp4`],
         {stdio : ['pipe', 'ignore', 'inherit']}
-    );//tell ffmpeg that input is mp4 because it may not be able to guess correctly
-    
-    //write the initialization segment first
-    recorder.stdio[0].write(initSegment);
-    
-    //write the buffer of segments
-    recorder.stdio[0].write(mp4segmenter.buffer);
-    
-    //start piping live segments to continue recording
-    mp4segmenter.pipe(recorder.stdio[0]);
-    
-    /* or */
-    
-    //listen for segment event and do something with segment
-    /*function onSeg(segment) {
-        recorder.stdio[0].write(segment);
-    }
+    );
 
-    mp4segmenter.on('segment', onSeg);*/
+    //write the init fragment AND buffered segments
+    recorder.stdio[0].write(mp4frag.bufferConcat);
+
+    //start piping live segments to continue recording
+    mp4frag.pipe(recorder.stdio[0]);
     
     //create a timer to cancel ffmpeg process
-    //todo reset timeout if motion is still occurring before timout completes
-    setTimeout((proc) => {
+    //todo reset timeout if motion is still occurring before timeout completes
+    setTimeout(() => {
         
         //unpipe or will throw error if killing process while piping
-        mp4segmenter.unpipe(recorder.stdio[0]);
-
-        //remove event lister here
-        //mp4segmenter.removeListener('segment', onSeg);
+        mp4frag.unpipe(recorder.stdio[0]);
         
         //close writing to stdin should close process
         recorder.stdio[0].end();

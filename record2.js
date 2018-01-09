@@ -4,12 +4,12 @@
 
 const { spawn } = require('child_process');
 
-const Mp4Segmenter = require('mp4frag');
+const Mp4Frag = require('mp4frag');
 
 const fs = require('fs');
 
-const mp4segmenter = new Mp4Segmenter({bufferSize: 3})//bufferSize = number of media segments of past video to store
-    .on('initialized', () => {
+const mp4frag = new Mp4Frag({bufferListSize: 3})//bufferSize = number of media segments of past video to store
+    .once('initialized', () => {
         console.log('initialized');
     });
 
@@ -22,7 +22,7 @@ const ffmpegSource = spawn('ffmpeg', [
     .on('exit', (code, signal) => {
         console.log('exit', code, signal);
     })
-    .stdio[1].pipe(mp4segmenter);
+    .stdio[1].pipe(mp4frag);
 
 
 //simulate a motion trigger that occurs at later point in time
@@ -31,34 +31,20 @@ setTimeout(()=> {
 
     const writeStream = fs.createWriteStream(`${Date.now()}.mp4`);
 
-    //write in the beginning of mp4 file
-    writeStream.write(mp4segmenter.initialization);
+    //mp4frag.bufferConcat has the init fragment and buffered segments combined into a single Buffer
+    writeStream.write(mp4frag.bufferConcat);
 
-    //write the saved segments
-    writeStream.write(mp4segmenter.buffer);
-
-    mp4segmenter.pipe(writeStream);
-
-    /*
-    //write the fresh segments
-    function onSegment(segment) {
-        writeStream.write(segment);
-    }
-
-    mp4segmenter.on('segment', onSegment);
-    */
+    //start piping live segments to the writer
+    mp4frag.pipe(writeStream);
     
     //create a timer to remove listener and close file being written
     //todo reset timeout if motion is still occurring before timout completes
     setTimeout(() => {
-
-        //remove event lister here
-        //mp4segmenter.removeListener('segment', onSegment);
         
-        mp4segmenter.unpipe(writeStream);
+        mp4frag.unpipe(writeStream);
         
         writeStream.end();
         
         console.log('file should be complete');
     }, 20000);
-}, 20000);
+}, 10000);
