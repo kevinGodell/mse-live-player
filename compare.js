@@ -196,6 +196,13 @@ for (let i = 0; i < database.length; i++) {
 
 //streams are available via streams['abc'] or streams.abc where 'abc' is the assigned id
 
+//adding path so that "pkg" can detect source files for packaging
+const path = require('path');
+console.log(path.join(__dirname, '/compare.html'));
+console.log(path.join(__dirname, '/public/player.js'));
+console.log(path.join(__dirname, '/public/player.min.js'));
+console.log(path.join(__dirname, '/public/player.css'));
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/compare.html');
 });
