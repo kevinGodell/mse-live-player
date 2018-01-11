@@ -34,7 +34,7 @@
   "homepage": "https://github.com/kevinGodell/mse-live-player#readme",
   "dependencies": {
     "express": "^4.16.2",
-    "mp4frag": "0.0.9",
+    "mp4frag": "0.0.11",
     "socket.io": "^2.0.4"
   }
 }
