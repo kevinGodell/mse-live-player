@@ -1,5 +1,3 @@
-// jshint esversion: 6, globalstrict: true, strict: true, bitwise: true, node: true, loopfunc: true
-
 'use strict';
 
 const app = require('express')();
@@ -8,9 +6,11 @@ const http = require('http').Server(app);
 
 const io = require('socket.io')(http/*, {origins: allowedOrigins}*/);
 
-const { spawn } = require('child_process');
+//const { spawn } = require('child_process');
 
 const Mp4Frag = require('mp4frag');
+
+const FfmpegRespawn = require('./FfmpegRespawn');
 
 //simulated data pulled from db, will add sqlite later todo
 const database = [
@@ -38,7 +38,10 @@ for (let i = 0; i < database.length; i++) {
     //create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
     const mp4frag = new Mp4Frag({hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize});
     //spawn ffmpeg with stream info and pipe to mp4frag
-    const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
+
+    const ffmpeg = new FfmpegRespawn({params: database[i].params, pipes: [{stdioIndex: 1, destination: mp4frag}], exitCallback: mp4frag.resetCache.bind(mp4frag)}).start();
+
+    /*const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
     //todo monitor ffmpeg and respawn if necessary
         .on('error', (error) => {
             console.log(database[i].name, 'error', error);
@@ -46,7 +49,7 @@ for (let i = 0; i < database.length; i++) {
         .on('exit', (code, signal) => {
             console.log(database[i].name, 'exit', code, signal);
         })
-        .stdio[1].pipe(mp4frag);
+        .stdio[1].pipe(mp4frag);*/
 
     streams[database[i].id] = {ffmpeg: ffmpeg, mp4frag: mp4frag};
 
