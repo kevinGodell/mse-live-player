@@ -10,7 +10,7 @@ const io = require('socket.io')(http/*, {origins: allowedOrigins}*/);
 
 const Mp4Frag = require('mp4frag');
 
-const FfmpegRespawn = require('./FfmpegRespawn');
+const FfmpegRespawn = require('ffmpeg-respawn');
 
 //simulated data pulled from db, will add sqlite later todo
 const database = [
@@ -39,7 +39,18 @@ for (let i = 0; i < database.length; i++) {
     const mp4frag = new Mp4Frag({hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize});
     //spawn ffmpeg with stream info and pipe to mp4frag
 
-    const ffmpeg = new FfmpegRespawn({params: database[i].params, pipes: [{stdioIndex: 1, destination: mp4frag}], exitCallback: mp4frag.resetCache.bind(mp4frag)}).start();
+    const ffmpeg = new FfmpegRespawn(
+        {
+            killAfterStall: 10,
+            spawnAfterExit: 5,
+            reSpawnLimit: 1000,
+            params: database[i].params,
+            pipes: [
+                {stdioIndex: 1, destination: mp4frag}
+                ],
+            exitCallback: mp4frag.resetCache.bind(mp4frag)
+        })
+        .start();
 
     /*const ffmpeg = spawn('ffmpeg', database[i].params, database[i].options)
     //todo monitor ffmpeg and respawn if necessary
