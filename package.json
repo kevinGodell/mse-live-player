@@ -4,8 +4,8 @@
   "description": "media source extension video player",
   "main": "server.js",
   "scripts": {
-    "test": "node server.js",
-    "start": "node compare.js"
+    "test": "node compare.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

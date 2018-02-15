@@ -12,6 +12,8 @@ const Mp4Frag = require('mp4frag');
 
 const FfmpegRespawn = require('ffmpeg-respawn');
 
+const ffmpegPath = require('ffmpeg-static').path;
+
 //simulated data pulled from db, will add sqlite later todo
 const database = [
     {
@@ -41,6 +43,7 @@ for (let i = 0; i < database.length; i++) {
 
     const ffmpeg = new FfmpegRespawn(
         {
+            path: ffmpegPath,
             killAfterStall: 10,
             spawnAfterExit: 5,
             reSpawnLimit: 1000,
