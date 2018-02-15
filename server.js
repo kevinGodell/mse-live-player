@@ -34,7 +34,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.4"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},//for debugging ffmpeg, change loglevel to any correct value other than quiet and it will print to node's stderr since it is marked as inherit
         hlsBase: 'one',
@@ -47,7 +47,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.5:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.5"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'two',
@@ -60,7 +60,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.6:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.6"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'three',
@@ -73,7 +73,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.7:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.7"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'four',
@@ -86,7 +86,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.8:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.8"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'five',
@@ -99,7 +99,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.9:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.9"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'six',
@@ -112,7 +112,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.21:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.21"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'seven',
@@ -125,7 +125,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.22:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.22"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'eight',
@@ -138,7 +138,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '32', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.23:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.23"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'nine',
@@ -151,7 +151,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '8192', '-analyzeduration', '0',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=1.sdp',
             '-c:a', 'aac', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '0', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'ten',
@@ -164,7 +164,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '1024', '-analyzeduration', '100000000',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.18:554/user=admin&password=pass&channel=1&stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.18-1"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'eleven',
@@ -177,7 +177,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '1024', '-analyzeduration', '100000000',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.18:554/user=admin&password=pass&channel=2&stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.18-2"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'twelve',
@@ -190,7 +190,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '1024', '-analyzeduration', '100000000',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.18:554/user=admin&password=pass&channel=3&stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.18-3"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'thirteen',
@@ -203,7 +203,7 @@ const database = [
             '-loglevel', 'quiet', '-probesize', '1024', '-analyzeduration', '100000000',
             '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.18:554/user=admin&password=pass&channel=4&stream=1.sdp',
             '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.18-4"', '-reset_timestamps', '1', 'pipe:1',
-            '-an', '-c:v', 'pam', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
+            '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'fourteen',
