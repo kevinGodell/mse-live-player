@@ -14,7 +14,7 @@ const Mp4Frag = require('mp4frag');
 
 const FR = require('ffmpeg-respawn');
 
-const ffmpegPath = require('ffmpeg-static').path;
+//const ffmpegPath = require('ffmpeg-static').path;
 
 app.all('/*', function(req, res, next) {
     console.log('req.url', req.url);
@@ -146,7 +146,7 @@ for (let i = 0; i < database.length; i++) {
 
     const ffmpeg = new FR(
         {
-            path: ffmpegPath,
+            //path: ffmpegPath,
             killAfterStall: 10,
             spawnAfterExit: 5,
             reSpawnLimit: 1000,
@@ -311,28 +311,35 @@ for (let i = 0; i < database.length; i++) {
 
 //streams are available via streams['abc'] or streams.abc where 'abc' is the assigned id
 
+const path = require('path');
+const index = path.join(__dirname, '/index.html');
+const index2 = path.join(__dirname, '/index2.html');
+const playerJs = path.join(__dirname, '/public/player.js');
+const playerMinJs = path.join(__dirname, '/public/player.min.js');
+const playerCss = path.join(__dirname, '/public/player.css');
+
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(index);
 });
 
 app.get('/index.html', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(index);
 });
 
 app.get('/index2.html', (req, res) => {
-    res.sendFile(__dirname + '/index2.html');
+    res.sendFile(index2);
 });
 
 app.get('/public/player.js', (req, res) => {
-    res.sendFile(__dirname + '/public/player.js');
+    res.sendFile(playerJs);
 });
 
 app.get('/public/player.min.js', (req, res) => {
-    res.sendFile(__dirname + '/public/player.min.js');
+    res.sendFile(playerMinJs);
 });
 
 app.get('/public/player.css', (req, res) => {
-    res.sendFile(__dirname + '/public/player.css');
+    res.sendFile(playerCss);
 });
 
 http.listen(3000, () => {
