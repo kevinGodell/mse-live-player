@@ -19,19 +19,19 @@ const database = [
     {
         id: 'starbucks',
         name: 'starbucks coffee',
-        params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
+        params: [/*'-loglevel', 'quiet', */'-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://131.95.3.162:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 131.95.3.162"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'starbucks',
         hlsListSize: 3
-    },
-    {
+    }
+    /*,{
         id: 'pool',
         name: 'resort pool',
         params: ['-loglevel', 'quiet', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', 'rtsp://216.4.116.29:554/axis-media/media.3gp', '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 216.4.116.29"', '-reset_timestamps', '1', 'pipe:1'],
         options: {stdio : ['ignore', 'pipe', 'ignore']},
         hlsBase: 'pool',
         hlsListSize: 3
-    }
+    }*/
 ];
 
 const streams = {};
@@ -252,7 +252,7 @@ app.get('/starbucks.mp4', (req, res) => {
     }
 });
 
-app.get('/pool.mp4', (req, res) => {
+/*app.get('/pool.mp4', (req, res) => {
     const init = streams.pool.mp4frag.initialization;
     if (!init) {
         //browser may have requested init segment before it was ready
@@ -266,7 +266,7 @@ app.get('/pool.mp4', (req, res) => {
             streams.pool.mp4frag.unpipe(res);
         });
     }
-});
+});*/
 
 http.listen(3000, () => {
     console.log('listening on localhost:3000');
