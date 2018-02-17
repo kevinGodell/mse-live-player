@@ -148,9 +148,9 @@ const database = [
         id: 'ten',
         name: 'back hallway',
         params: [
-            /*'-loglevel', 'quiet',*/'-probesize', '8192', '-analyzeduration', '0',
-            '-reorder_queue_size', '0', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=1.sdp',
-            '-c:a', 'aac', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '0', 'pipe:1',
+            /*'-loglevel', 'quiet',*/'-probesize', '8192', '-analyzeduration', '100000000',
+            '-reorder_queue_size', '2', '-rtsp_transport', 'tcp', '-i', 'rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=1.sdp',
+            '-c:a', 'aac', '-c:v', 'libx264', '-vf', 'fps=5,scale=-1:-1,format=yuv420p', '-frag_duration', '3000000', '-min_frag_duration', '3000000', '-profile:v', 'baseline', '-level', '3.0', '-crf', '25', '-f', 'mp4', '-movflags', '+faststart+frag_keyframe+empty_moov+default_base_moof+omit_tfhd_offset', '-metadata', 'title="ip 192.168.1.25"', '-reset_timestamps', '1', 'pipe:1',
             '-an', '-c:v', 'pam', '-pix_fmt', 'gray', '-f', 'image2pipe', '-vf', 'fps=2,scale=640:480', 'pipe:4'
         ],
         //options: {stdio : ['ignore', 'pipe', 'ignore']},
