@@ -18,7 +18,7 @@ const P2P = require('pipe2pam');
 
 const PD = require('pam-diff');
 
-//const ffmpegPath = require('ffmpeg-static').path;
+const ffmpegPath = require('ffmpeg-static').path;
 
 app.all('/*', function(req, res, next) {
     console.log('req.url', req.url);
@@ -228,7 +228,7 @@ for (let i = 0; i < database.length; i++) {
 
     const ffmpeg = new FR(
         {
-            //path: ffmpegPath,
+            path: ffmpegPath,
             killAfterStall: 10,
             spawnAfterExit: 5,
             reSpawnLimit: 1000,
