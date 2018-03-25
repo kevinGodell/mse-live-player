@@ -1,5 +1,7 @@
 # mse-live-player
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kevinGodell/mse-live-player.svg)](https://greenkeeper.io/)
+
 install files with git
 
 ```
