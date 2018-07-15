@@ -231,7 +231,7 @@ for (let i = 0; i < database.length; i++) {
             path: ffmpegPath,
             killAfterStall: 10,
             spawnAfterExit: 5,
-            reSpawnLimit: 1000,
+            reSpawnLimit: 10000,
             params: database[i].params,
             pipes: [
                 {stdioIndex: 1, destination: mp4frag},
