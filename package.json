@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "node compare.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "standard --verbose server.js",
+    "lint:fix": "standard --fix server.js"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "pam-diff": "^0.12.0-napi",
     "pipe2jpeg": "^0.2.7",
     "pipe2pam": "^0.6.2",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "standard": "^12.0.1"
   }
 }
