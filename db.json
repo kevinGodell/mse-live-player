@@ -366,8 +366,6 @@
     "params": [
       "-hwaccel",
       "auto",
-      "-hwaccel",
-      "auto",
       "-probesize",
       "8192",
       "-analyzeduration",
