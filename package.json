@@ -36,10 +36,11 @@
   "devDependencies": {
     "express": "^4.16.2",
     "ffmpeg-respawn": "0.0.14",
-    "ffmpeg-static": "^2.1.0",
+    "ffmpeg-static": "^2.4.0",
     "mp4frag": "0.0.22",
     "pam-diff": "^0.12.0-napi",
+    "pipe2jpeg": "^0.2.7",
     "pipe2pam": "^0.6.2",
-    "socket.io": "^2.0.4"
+    "socket.io": "^2.1.1"
   }
 }
