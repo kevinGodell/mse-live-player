@@ -241,6 +241,6 @@ app.get('/public/player.css', (req, res) => {
     res.sendFile(playerCss);
 });
 
-http.listen(3000, () => {
-    console.log('listening on localhost:3000');
+http.listen(80, () => {
+    console.log('listening on localhost:80');
 });
