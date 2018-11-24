@@ -388,7 +388,7 @@ app.get(`/:id/playlist.m3u8.txt`, (req, res) => {
     // todo set timer to cancel listener because initialized may never get called
     // timer will cancel request and probably give 503
     mp4frag.once('initialized', (data) => {
-      send(res, mp4frag.m3u8)
+      send(res, data.m3u8)
     })
   }
 
