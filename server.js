@@ -211,6 +211,7 @@ for (let i = 0; i < database.length; i++) {
 const path = require('path')
 const index = path.join(__dirname, '/index.html')
 const index2 = path.join(__dirname, '/index2.html')
+const index3 = path.join(__dirname, '/index3.html')
 const playerJs = path.join(__dirname, '/public/player.js')
 const playerMinJs = path.join(__dirname, '/public/player.min.js')
 const playerCss = path.join(__dirname, '/public/player.css')
@@ -225,6 +226,10 @@ app.get('/index.html', (req, res) => {
 
 app.get('/index2.html', (req, res) => {
   res.sendFile(index2)
+})
+
+app.get('/index3.html', (req, res) => {
+    res.sendFile(index3)
 })
 
 app.get('/public/player.js', (req, res) => {
@@ -286,7 +291,7 @@ app.get('/:id/video.mjpeg', (req, res) => {
   } else {
     // todo listen for jpeg event to make sure it starts pushing out jpegs, otherwise time out the connection
     // timer will cancel request and probably give 503
-    pipe2jpeg.on('jpeg', (data) => {
+    pipe2jpeg.once('jpeg', (data) => {
       send(res, data)
     })
   }
@@ -350,28 +355,71 @@ app.get(`/:id/video.mp4`, (req, res) => {
 })
 
 app.get(`/:id/playlist.m3u8`, (req, res) => {
+    const mp4frag = res.locals.stream.mp4frag
+    if (!mp4frag) {
+        res.status(404)
+            .end(`playlist.m3u8 not found for stream "${res.locals.id}"`)
+        return
+    }
+    const m3u8 = mp4frag.m3u8
+    if (m3u8) {
+        send(res, m3u8)
+    } else {
+        // todo set timer to cancel listener because initialized may never get called
+        // timer will cancel request and probably give 503
+        mp4frag.once('initialized', (data) => {
+            send(res, mp4frag.m3u8)
+        })
+    }
+
+    function send (res, m3u8) {
+        res.status(200)
+            .set('Content-Type', 'application/vnd.apple.mpegurl')
+            .end(m3u8)
+    }
+})
+
+app.get(`/:id/init-*.mp4`, (req, res) => {
   const mp4frag = res.locals.stream.mp4frag
   if (!mp4frag) {
     res.status(404)
-      .end(`playlist.m3u8 not found for stream "${res.locals.id}"`)
+      .end(`init-*.mp4 not found for stream "${res.locals.id}"`)
     return
   }
-  const m3u8 = mp4frag.m3u8
-  if (m3u8) {
-    send(res, m3u8)
+  const init = mp4frag.initialization
+  if (init) {
+    send(res, init)
   } else {
     // todo set timer to cancel listener because initialized may never get called
     // timer will cancel request and probably give 503
     mp4frag.once('initialized', (data) => {
-      send(res, mp4frag.m3u8)
+      send(res, mp4frag.initialization)
     })
   }
 
-  function send (res, m3u8) {
+  function send (res, init) {
     res.status(200)
-      .set('Content-Type', 'application/vnd.apple.mpegurl')
-      .end(m3u8)
+      .set('Content-Type', 'video/mp4')
+      .end(init)
   }
+})
+
+app.get(`/:id/([a-z]+):segment(\\d+).m4s`, (req, res) => {
+    const mp4frag = res.locals.stream.mp4frag
+    if (!mp4frag) {
+        res.status(404)
+            .end(`hls segment not found for stream "${res.locals.id}"`)
+        return
+    }
+    const segment = mp4frag.getHlsSegment(req.params.segment)
+    if (segment) {
+        res.status(200)
+            .set('Content-Type', 'video/mp4')
+            .end(segment)
+    } else {
+        res.status(503)
+            .end('503 for m4s segment')
+    }
 })
 
 app.get(`/:id/playlist.m3u8.txt`, (req, res) => {
