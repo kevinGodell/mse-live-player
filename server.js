@@ -212,6 +212,7 @@ const path = require('path')
 const index = path.join(__dirname, '/index.html')
 const index2 = path.join(__dirname, '/index2.html')
 const index3 = path.join(__dirname, '/index3.html')
+const index4 = path.join(__dirname, '/index4.html')
 const playerJs = path.join(__dirname, '/public/player.js')
 const playerMinJs = path.join(__dirname, '/public/player.min.js')
 const playerCss = path.join(__dirname, '/public/player.css')
@@ -230,6 +231,10 @@ app.get('/index2.html', (req, res) => {
 
 app.get('/index3.html', (req, res) => {
   res.sendFile(index3)
+})
+
+app.get('/index4.html', (req, res) => {
+  res.sendFile(index4)
 })
 
 app.get('/public/player.js', (req, res) => {
@@ -484,7 +489,7 @@ app.get('/:id/stop', (req, res) => {
 })
 
 http.listen(80, () => {
-  console.log('listening on localhost:80')
+  console.log('listening on localhost:8080')
 })
 
 // todo listen to video player stop and alert all connected streams
