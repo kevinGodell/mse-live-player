@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        /*var exampleSocket = new WebSocket("ws://localhost/api/one/jpeg/", ["protocolOne", "protocolTwo"]);
+        exampleSocket.onopen = function (event) {
+            exampleSocket.send("Here's some text that the server is urgently awaiting!");
+        };
+        exampleSocket.onmessage = function (event) {
+            console.log(event.data);
+        }*/
+    </script>
+</head>
+<body>
+<img id="jpegImg"/>
+
+<script>
+    var jpegImg = document.getElementById('jpegImg');
+    var urlCreator = window.URL || window.webkitURL;
+
+    jpegImg.addEventListener('load', onLoad, {capture: false, passive: true, once: false});
+
+    function onLoad() {
+        console.log('on load')
+        urlCreator.revokeObjectURL(jpegImg.src)
+    }
+
+    console.log(jpegImg);
+
+    var exampleSocket = new WebSocket("ws://192.168.1.82/api/one/jpeg/", ["protocolOne", "protocolTwo"]);
+    exampleSocket.binaryType = 'arraybuffer';//'blob'
+    //exampleSocket.binaryType = 'blob';
+    exampleSocket.onopen = function (event) {
+        exampleSocket.send("Here's some text that the server is urgently awaiting!");
+    };
+    exampleSocket.onmessage = function (event) {
+        //console.log(event);
+        //console.log(event.data);
+        const data = event.data
+        //console.log('string', typeof data === "string")
+        //console.log('arraybuffer', data instanceof ArrayBuffer)
+        //console.log('blob', data instanceof Blob)
+        if (typeof data === 'string') {
+            //read message
+            //console.log(data, ' is a string')
+        } else if (data instanceof Blob) {
+            //console.log('image from blob')
+            //var urlCreator = window.URL || window.webkitURL;
+            jpegImg.src = urlCreator.createObjectURL(data);
+        } else {
+            //console.log('image from arraybuffer')
+            var arrayBufferView = new Uint8Array(data);
+            var blob = new window.Blob([arrayBufferView], { type: 'image/jpeg' });
+            //var urlCreator = window.URL || window.webkitURL;
+            jpegImg.src = urlCreator.createObjectURL(blob);
+        }
+    };
+
+
+
+
+
+
+    //var jpegSocket = new WebSocket("ws://localhost/api/one/jpeg/")
+
+    /*var jpegSocket = window.io.connect(window.location.origin + '/jpeg', {
+        transports: ['websocket'],
+        forceNew: true,
+        reconnection: true,
+        reconnectionDelay: 500
+    });*/
+
+    /*jpegSocket.onmessage = function (event) {
+        var arrayBufferView = new Uint8Array(event.data);
+        var blob = new window.Blob([arrayBufferView], { type: 'image/jpeg' });
+        var urlCreator = window.URL || window.webkitURL;
+        jpegImg.src = urlCreator.createObjectURL(blob);
+    };*/
+</script>
+
+</body>
+</html>
