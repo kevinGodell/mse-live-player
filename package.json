@@ -6,8 +6,8 @@
   "scripts": {
     "test": "node compare.js",
     "start": "node server.js",
-    "lint": "standard --verbose server.js",
-    "lint:fix": "standard --fix server.js"
+    "lint": "standard --verbose server.js ./routes/routes.js",
+    "lint:fix": "standard --fix server.js ./routes/routes.js"
   },
   "repository": {
     "type": "git",
@@ -44,6 +44,11 @@
     "pipe2jpeg": "^0.2.7",
     "pipe2pam": "^0.6.2",
     "socket.io": "^2.1.1",
-    "standard": "^12.0.1"
+    "standard": "^12.0.1",
+    "ws": "^6.1.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.0",
+    "utf-8-validate": "^5.0.1"
   }
 }
