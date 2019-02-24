@@ -2,7 +2,7 @@
 
 'use strict'
 
-//const WebSocket = require('ws')
+// const WebSocket = require('ws')
 
 const express = require('express')
 
@@ -16,16 +16,14 @@ app.disable('x-powered-by')
 
 const http = require('http').Server(app)
 
-http.on('upgrade', function upgrade(request, socket, head) {
-    console.log('upgrade')
-    const pathname = request
-        //console.log('upgrade', pathname)
+http.on('upgrade', function upgrade (request, socket, head) {
+  const pathname = request.url
+  console.log('upgrade', pathname)
 })
 
-//const wss = new WebSocket.Server({server: http });
+// const wss = new WebSocket.Server({server: http });
 
-/*wss.on('connection', function connection(ws, req) {
-
+/* wss.on('connection', function connection(ws, req) {
 
     console.log('ws connection')
 
@@ -79,13 +77,12 @@ http.on('upgrade', function upgrade(request, socket, head) {
 
    // ws.emit('hello')
 
-});*/
+}); */
 
 const io = require('socket.io')(http/*, {origins: allowedOrigins} */)
 
 io.on('connect', (data) => {
-  console.log('io connect', data)
-
+  console.log('io connect'/*, data */)
 })
 
 const Mp4Frag = require('mp4frag')
@@ -113,6 +110,7 @@ for (let i = 0; i < database.length; i++) {
   const ffmpeg = new FR(
     {
       path: ffmpegPath,
+      logLevel: database[i].logLevel,
       killAfterStall: 10,
       spawnAfterExit: 5,
       reSpawnLimit: Number.POSITIVE_INFINITY,
@@ -121,11 +119,14 @@ for (let i = 0; i < database.length; i++) {
         { stdioIndex: 1, destination: mp4frag },
         { stdioIndex: 4, destination: pipe2jpeg }
       ],
-      exitCallback: mp4frag.resetCache.bind(mp4frag)
+      exitCallback: (code, signal) => {
+        console.error('exit', database[i].name, code, signal)
+        mp4frag.resetCache.bind(mp4frag)
+      }
     })
     .start()
 
-  //streams[database[i].id] = { ffmpeg: ffmpeg, mp4frag: mp4frag, pipe2jpeg: pipe2jpeg }
+  // streams[database[i].id] = { ffmpeg: ffmpeg, mp4frag: mp4frag, pipe2jpeg: pipe2jpeg }
   streams.set(database[i].id, { ffmpeg: ffmpeg, mp4frag: mp4frag, pipe2jpeg: pipe2jpeg })
 
   // todo move all socket routes out of loop and put at end with matching req.params.id :id
@@ -136,7 +137,7 @@ for (let i = 0; i < database.length; i++) {
   io
     .of(namespace)// accessing "/namespace" of io based on id of stream
     .on('connection', (socket) => { // listen for connection to /namespace
-      //console.log(`a user connected to namespace "${namespace}"`)
+      // console.log(`a user connected to namespace "${namespace}"`)
 
       // event listener
       const onInitialized = () => {
@@ -153,7 +154,7 @@ for (let i = 0; i < database.length; i++) {
       // client request
       const mimeReq = () => {
         if (mp4frag.mime) {
-          //console.log(`${namespace} : ${mp4frag.mime}`)
+          // console.log(`${namespace} : ${mp4frag.mime}`)
           socket.emit('mime', mp4frag.mime)
         } else {
           mp4frag.on('initialized', onInitialized)
@@ -204,7 +205,7 @@ for (let i = 0; i < database.length; i++) {
 
       // listen to client messages
       socket.on('message', (msg) => {
-       // console.log(`${namespace} message : ${msg}`)
+        // console.log(`${namespace} message : ${msg}`)
         switch (msg) {
           case 'mime' :// client is requesting mime
             mimeReq()
@@ -232,14 +233,13 @@ for (let i = 0; i < database.length; i++) {
 
       socket.on('disconnect', () => {
         stopReq()
-        //console.log(`A user disconnected from namespace "${namespace}"`)
+        // console.log(`A user disconnected from namespace "${namespace}"`)
       })
     })
-
 }
 
 http.listen(80, () => {
-  console.log('listening on localhost:8080')
+  console.log('listening on localhost:80')
 })
 
 module.exports = app

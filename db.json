@@ -1,48 +1,50 @@
 [
   {
-  "id": "one",
-  "name": "front porch",
-  "params": [
-    "-hwaccel",
-    "auto",
-    "-probesize",
-    "32",
-    "-analyzeduration",
-    "0",
-    "-reorder_queue_size",
-    "0",
-    "-rtsp_transport",
-    "tcp",
-    "-i",
-    "rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=1.sdp",
-    "-an",
-    "-c:v",
-    "copy",
-    "-f",
-    "mp4",
-    "-movflags",
-    "+dash+negative_cts_offsets",
-    "-metadata",
-    "title=\"ip 192.168.1.4\"",
-    "pipe:1",
-    "-c",
-    "mjpeg",
-    "-q",
-    "10",
-    "-r",
-    "7",
-    "-vf",
-    "scale=trunc(iw*0.75/2)*2:-2",
-    "-f",
-    "image2pipe",
-    "pipe:4"
-  ],
-  "hlsBase": "one",
-  "hlsListSize": 3
-},
+    "id": "one",
+    "name": "front porch",
+    "logLevel": "quiet",
+    "params": [
+      "-hwaccel",
+      "auto",
+      "-probesize",
+      "32",
+      "-analyzeduration",
+      "0",
+      "-reorder_queue_size",
+      "0",
+      "-rtsp_transport",
+      "tcp",
+      "-i",
+      "rtsp://192.168.1.4:554/user=admin_password=pass_channel=1_stream=1.sdp",
+      "-an",
+      "-c:v",
+      "copy",
+      "-f",
+      "mp4",
+      "-movflags",
+      "+dash+negative_cts_offsets",
+      "-metadata",
+      "title=\"ip 192.168.1.4\"",
+      "pipe:1",
+      "-c",
+      "mjpeg",
+      "-q",
+      "10",
+      "-r",
+      "7",
+      "-vf",
+      "scale=trunc(iw*0.75/2)*2:-2",
+      "-f",
+      "image2pipe",
+      "pipe:4"
+    ],
+    "hlsBase": "one",
+    "hlsListSize": 3
+  },
   {
     "id": "two",
     "name": "back door",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -84,6 +86,7 @@
   {
     "id": "three",
     "name": "side porch",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -123,9 +126,9 @@
     "hlsListSize": 3
   },
   {
-
     "id": "four",
     "name": "side gate",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -167,6 +170,7 @@
   {
     "id": "five",
     "name": "driveway west",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -208,6 +212,7 @@
   {
     "id": "six",
     "name": "driveway east",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -249,6 +254,7 @@
   {
     "id": "seven",
     "name": "backyard",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -290,6 +296,7 @@
   {
     "id": "eight",
     "name": "dining room",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -331,6 +338,7 @@
   {
     "id": "nine",
     "name": "living room",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -372,19 +380,23 @@
   {
     "id": "ten",
     "name": "back hallway",
+    "logLevel": "info",
     "params": [
+      "-hide_banner",
       "-hwaccel",
       "auto",
       "-probesize",
-      "8192",
+      "32768",
       "-analyzeduration",
       "100000000",
       "-reorder_queue_size",
-      "0",
+      "5",
       "-rtsp_transport",
       "tcp",
       "-i",
       "rtsp://192.168.1.25:554/user=admin_password=pass_channel=1_stream=1.sdp",
+      "-copytb",
+      "1",
       "-c:a",
       "aac",
       "-c:v",
@@ -414,6 +426,7 @@
   {
     "id": "eleven",
     "name": "garage 1",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -455,6 +468,7 @@
   {
     "id": "twelve",
     "name": "garage 2",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -496,6 +510,7 @@
   {
     "id": "thirteen",
     "name": "garage 3",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
@@ -537,6 +552,7 @@
   {
     "id": "forteen",
     "name": "garage 4",
+    "logLevel": "quiet",
     "params": [
       "-hwaccel",
       "auto",
