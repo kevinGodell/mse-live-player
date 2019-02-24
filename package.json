@@ -37,7 +37,7 @@
   "dependencies": {},
   "devDependencies": {
     "express": "^4.16.4",
-    "ffmpeg-respawn": "^0.1.0",
+    "ffmpeg-respawn": "^0.1.1",
     "ffmpeg-static": "^2.4.0",
     "mp4frag": "^0.1.1",
     "pam-diff": "^0.13.5",
