@@ -57,7 +57,7 @@ module.exports = (io, streams) => {
                     switch(data) {
                         // send single jpeg
                         case 'single' :
-                            socket.binary(true).emit('jpeg', stream.pipe2jpeg.jpeg);
+                            socket.volatile.binary(true).emit('jpeg', stream.pipe2jpeg.jpeg);
                             break;
 
                             // send endless jpegs
