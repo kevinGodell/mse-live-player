@@ -380,7 +380,7 @@
   {
     "id": "ten",
     "name": "back hallway",
-    "logLevel": "info",
+    "logLevel": "quiet",
     "params": [
       "-hide_banner",
       "-hwaccel",

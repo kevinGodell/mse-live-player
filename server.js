@@ -2,88 +2,28 @@
 
 'use strict'
 
-// const WebSocket = require('ws')
+// const { inspect } = require('util')
+
+const sockets = require('./sockets')
 
 const express = require('express')
 
 const app = express()
 
-const routes = require('./routes/routes')
+const routes = require('./routes')
 
 routes(app)
 
 app.disable('x-powered-by')
 
-const http = require('http').Server(app)
+const server = require('http').Server(app)
 
-http.on('upgrade', function upgrade (request, socket, head) {
-  const pathname = request.url
-  console.log('upgrade', pathname)
+server.on('upgrade', (request, socket, head) => {
+  // const pathname = request.url
+  // console.log('http upgrade', request.url)
 })
 
-// const wss = new WebSocket.Server({server: http });
-
-/* wss.on('connection', function connection(ws, req) {
-
-    console.log('ws connection')
-
-    ws.on('open', function open(message) {
-        console.log('open: %s', message)
-    })
-
-    ws.on('close', function open(message) {
-        console.log('close: %s', message)
-    })
-
-    const ip = req.connection.remoteAddress;
-
-    console.log('ip', ip)
-
-    ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
-    });
-
-    //ws.send(new ArrayBuffer('something'));
-
-    const jpeg = app.locals.streams.get('one').pipe2jpeg.jpeg
-
-    console.log(jpeg.length)
-
-    //ws.binaryType = 'arraybuffer'
-
-    //ws.binaryType = 'blob'
-
-    //BINARY_TYPES: ['nodebuffer', 'arraybuffer', 'fragments'],
-    //ws.binaryType = 'nodebuffer'
-
-    ws.send('jpeg')
-    ws.send(jpeg)
-
-    const pipe2jpeg = app.locals.streams.get('one').pipe2jpeg
-
-    const send = data => {
-        ws.send(data)
-    }
-
-    pipe2jpeg.on('jpeg', send);
-
-    ws.once('close', ()=> {
-        console.log('close ws and remove listener')
-        console.log(pipe2jpeg.listeners('jpeg'))
-        pipe2jpeg.removeListener('jpeg', send)
-        console.log(pipe2jpeg.listeners('jpeg'))
-        pipe2jpeg.removeListener('jpeg', send)
-    })
-
-   // ws.emit('hello')
-
-}); */
-
-const io = require('socket.io')(http/*, {origins: allowedOrigins} */)
-
-io.on('connect', (data) => {
-  console.log('io connect'/*, data */)
-})
+const io = require('socket.io')(server, { origins: '*:*', transports: ['websocket'] })/// *, {origins: allowedOrigins} */)
 
 const Mp4Frag = require('mp4frag')
 
@@ -91,7 +31,7 @@ const FR = require('ffmpeg-respawn')
 
 const P2J = require('pipe2jpeg')
 
-const ffmpegPath = require('ffmpeg-static').path
+const { path: ffmpegPath } = require('ffmpeg-static')
 
 // simulated data pulled from db, will add sqlite later todo
 const database = require('./db')
@@ -121,7 +61,9 @@ for (let i = 0; i < database.length; i++) {
       ],
       exitCallback: (code, signal) => {
         console.error('exit', database[i].name, code, signal)
-        mp4frag.resetCache.bind(mp4frag)
+        if (mp4frag) {
+          mp4frag.resetCache()
+        }
       }
     })
     .start()
@@ -238,7 +180,10 @@ for (let i = 0; i < database.length; i++) {
     })
 }
 
-http.listen(80, () => {
+sockets(io, streams)
+
+// need to be sudo on some systems to use port 80
+server.listen(80, () => {
   console.log('listening on localhost:80')
 })
 

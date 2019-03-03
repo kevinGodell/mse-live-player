@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>player</title>
+    <style>
+        img {
+            width: 275px;
+            height: 210px;
+        }
+    </style>
+</head>
+<body>
+
+<img id="one" src="/api/one/jpeg/image.jpeg"/>
+
+<img id="two" src="/api/two/jpeg/image.jpeg"/>
+
+<img id="three" src="/api/three/jpeg/image.jpeg"/>
+
+<img id="four" src="/api/four/jpeg/image.jpeg"/>
+
+<img id="five" src="/api/five/jpeg/image.jpeg"/>
+
+<img id="six" src="/api/six/jpeg/image.jpeg"/>
+
+<img id="seven" src="/api/seven/jpeg/image.jpeg"/>
+
+<img id="eight" src="/api/eight/jpeg/image.jpeg"/>
+
+<img id="nine" src="/api/nine/jpeg/image.jpeg"/>
+
+<img id="ten" src="/api/ten/jpeg/image.jpeg"/>
+
+<img id="eleven" src="/api/eleven/jpeg/image.jpeg"/>
+
+<img id="twelve" src="/api/twelve/jpeg/image.jpeg"/>
+
+<img id="thirteen" src="/api/thirteen/jpeg/image.jpeg"/>
+
+<img id="forteen" src="/api/forteen/jpeg/image.jpeg"/>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    const imgs = document.getElementsByTagName('img');
+    for (let i = 0; i < imgs.length; i++) {
+        const img = imgs[i];
+        const type = 'jpeg';
+        const jpegSocket = io.connect(window.location.origin + '/api', {
+            transports: ['websocket'],
+            forceNew: true,
+            reconnection: true,
+            reconnectionDelay: 500,
+            query: `id=${img.id}&type=${type}`
+        })
+
+        jpegSocket.on('connect', function onConnect() {
+            console.log('connect');
+        })
+
+        jpegSocket.on('message', function onStatus(data) {
+            if (data.status === 'ready') {
+                setInterval(()=> {
+                    jpegSocket.emit('request', 'single');
+                }, 500);
+            }
+        })
+
+        jpegSocket.on('jpeg', function onJpeg(data) {
+            const arrayBufferView = new Uint8Array(data);
+            const blob = new window.Blob([arrayBufferView], { type: 'image/jpeg' });
+            const urlCreator = window.URL || window.webkitURL;
+            img.src = urlCreator.createObjectURL(blob);
+        });
+    }
+
+</script>
+</body>
+</html>

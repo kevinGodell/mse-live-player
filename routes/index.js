@@ -1,6 +1,7 @@
 'use strict'
 
 const { Writable } = require('stream')
+const {inspect} = require('util')
 
 module.exports = (app) => {
   // todo path.join will be needed for packaging with pkg
@@ -10,6 +11,7 @@ module.exports = (app) => {
   const index2 = path.join(__dirname, '../index2.html')
   const index3 = path.join(__dirname, '../index3.html')
   const index4 = path.join(__dirname, '../index4.html')
+  const index5 = path.join(__dirname, '../index5.html')
   const playerJs = path.join(__dirname, '../public/player.js')
   const playerMinJs = path.join(__dirname, '../public/player.min.js')
   const playerCss = path.join(__dirname, '../public/player.css')
@@ -42,6 +44,10 @@ module.exports = (app) => {
     res.sendFile(index4)
   })
 
+  app.get('/index5.html', (req, res) => {
+    res.sendFile(index5)
+  })
+
   app.get('/public/player.js', (req, res) => {
     res.sendFile(playerJs)
   })
@@ -55,21 +61,31 @@ module.exports = (app) => {
   })
 
   app.param('id', (req, res, next, id) => {
+    // console.log('parse id')
     const streams = app.locals.streams
     const stream = streams.get(id)
-    if (stream) {
-      res.locals.id = id
-      res.locals.stream = stream
-      return next()
+    if (!stream) {
+      return res.status(404)
+        .end(`stream "${id}" not found`)
     }
-    res.status(404)
-      .end(`stream "${id}" not found`)
+    if (!stream.hasOwnProperty('ffmpeg')) {
+      return res.status(500)
+        .end(`stream "${id}" does not have a valid ffmpeg src`)
+    }
+    res.locals.id = id
+    res.locals.stream = stream
+    next()
   })
 
   app.param('type', (req, res, next, type) => {
+    // console.log('parse type')
     const stream = res.locals.stream
     switch (type) {
       case 'mp4' :
+        if (!stream.ffmpeg.running) {
+          return res.status(503)
+            .end(`stream "${res.locals.id}" is currently not running`)
+        }
         if (stream.hasOwnProperty('mp4frag')) {
           res.locals.mp4frag = stream.mp4frag
           return next()
@@ -77,6 +93,10 @@ module.exports = (app) => {
         return res.status(404)
           .end(`mp4 type not found for stream ${res.locals.id}`)
       case 'jpeg' :
+        if (!stream.ffmpeg.running) {
+          return res.status(503)
+            .end(`stream "${res.locals.id}" is currently not running`)
+        }
         if (stream.hasOwnProperty('pipe2jpeg')) {
           res.locals.pipe2jpeg = stream.pipe2jpeg
           return next()
@@ -90,31 +110,36 @@ module.exports = (app) => {
         }
         return res.status(404)
           .end(`cmd type not found for stream ${res.locals.id}`)
+      case 'debug' :
+        return res.end(inspect(res.locals.stream, { sorted: true, showHidden: false, compact: false, depth: 2, colors: false, breakLength: 200, getters: true}))
       default :
         res.status(404)
           .end(`${type} type not found for stream ${res.locals.id}`)
     }
   })
 
-  app.get('/api/:id([a-zA-Z]+)/:type/*', (req, res, next) => {
+  app.get('/api/:id/:type/*', (req, res, next) => {
     // trigger the app.param functions
+    // console.log('trigger the param parser', req.params.id, req.params.type)
     next()
   })
 
-  app.get('/api/[a-zA-Z]+/jpeg/image.jpeg', (req, res) => {
+  app.get('/api/*/jpeg/image.jpeg', (req, res) => {
+    // console.log('image jpeg')
     const pipe2jpeg = res.locals.pipe2jpeg
     const jpeg = pipe2jpeg.jpeg
     if (!jpeg) {
-      res.status(503)
+      return res.status(503)
         .set('Retry-After', 10)
         .end(`Stream "${res.locals.id}" image.jpeg currently unavailable. Please try again later.`)
     }
-    return res.status(200)
+    res.status(200)
       .set('Content-Type', 'image/jpeg')
       .end(jpeg)
   })
 
-  app.get('/api/[a-zA-Z]+/jpeg/video.mjpeg', (req, res) => {
+  app.get('/api/*/jpeg/video.mjpeg', (req, res) => {
+    // console.log('video mjpeg')
     const pipe2jpeg = res.locals.pipe2jpeg
     const jpeg = pipe2jpeg.jpeg
 
@@ -147,7 +172,8 @@ module.exports = (app) => {
     })
   })
 
-  app.get(`/api/[a-zA-Z]+/mp4/video.mp4`, (req, res) => {
+  app.get(`/api/*/mp4/video.mp4`, (req, res) => {
+    // console.log('video mp4')
     const mp4frag = res.locals.mp4frag
     const init = mp4frag.initialization
     if (!init) {
@@ -172,7 +198,7 @@ module.exports = (app) => {
     })
   })
 
-  app.get(`/api/[a-zA-Z]+/mp4/playlist.m3u8`, (req, res) => {
+  app.get(`/api/*/mp4/playlist.m3u8`, (req, res) => {
     const mp4frag = res.locals.mp4frag
     const m3u8 = mp4frag.m3u8
     if (!m3u8) {
@@ -185,7 +211,7 @@ module.exports = (app) => {
       .end(m3u8)
   })
 
-  app.get(`/api/[a-zA-Z]+/mp4/init-[a-zA-Z]+.mp4`, (req, res) => {
+  app.get(`/api/*/mp4/init-[a-zA-Z]+.mp4`, (req, res) => {
     const mp4frag = res.locals.mp4frag
     const init = mp4frag.initialization
     if (!init) {
@@ -198,9 +224,10 @@ module.exports = (app) => {
       .end(init)
   })
 
-  app.get(`/api/[a-zA-Z]+/mp4/([a-z]+):segment(\\d+).m4s`, (req, res) => {
+  app.get(`/api/*/mp4/:segment(*.m4s)`, (req, res) => {
+    // console.log('named segment', req.params.segment)
     const mp4frag = res.locals.mp4frag
-    const segment = mp4frag.getHlsSegment(req.params.segment)
+    const segment = mp4frag.getHlsNamedSegment(req.params.segment)
     if (!segment) {
       return res.status(503)
         .end('503 for m4s segment')
@@ -210,7 +237,7 @@ module.exports = (app) => {
       .end(segment)
   })
 
-  app.get(`/api/[a-zA-Z]+/mp4/playlist.m3u8.txt`, (req, res) => {
+  app.get(`/api/*/mp4/playlist.m3u8.txt`, (req, res) => {
     const mp4frag = res.locals.mp4frag
     const m3u8 = mp4frag.m3u8
     if (!m3u8) {
@@ -219,30 +246,30 @@ module.exports = (app) => {
         .end(`Stream "${res.locals.id}" playlist.m3u8 currently unavailable. Please try again later.`)
     }
     res.status(200)
-      .set('Content-Type', 'test/plain')
+      .set('Content-Type', 'text/plain')
       .end(m3u8)
   })
 
-  app.get('/api/[a-zA-Z]+/cmd/start', (req, res) => {
+  app.get('/api/*/cmd/start', (req, res) => {
     const ffmpeg = res.locals.ffmpeg
     if (ffmpeg.running === true) {
-      console.log('ffmpeg already running')
+      // console.log('ffmpeg already running')
       ffmpeg.start()
     } else {
-      console.log('starting ffmpeg')
+      // console.log('starting ffmpeg')
       ffmpeg.start()
     }
     res.status(200)
       .end(`ffmpeg running: ${ffmpeg.running}`)
   })
 
-  app.get('/api/[a-zA-Z]+/cmd/stop', (req, res) => {
+  app.get('/api/*/cmd/stop', (req, res) => {
     const ffmpeg = res.locals.ffmpeg
     if (ffmpeg.running === false) {
-      console.log('ffmpeg already stopped')
+      // console.log('ffmpeg already stopped')
       ffmpeg.stop()
     } else {
-      console.log('stopping ffmpeg')
+      // console.log('stopping ffmpeg')
       ffmpeg.stop()
     }
     res.status(200)
