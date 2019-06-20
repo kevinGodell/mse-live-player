@@ -1,64 +1,17 @@
-'use strict'
-
+const express = require('express')
 const { Writable } = require('stream')
-const {inspect} = require('util')
+const { inspect } = require('util')
 
 module.exports = (app) => {
-  // todo path.join will be needed for packaging with pkg
+  app.disable('x-powered-by')
 
-  const path = require('path')
-  const index = path.join(__dirname, '../index.html')
-  const index2 = path.join(__dirname, '../index2.html')
-  const index3 = path.join(__dirname, '../index3.html')
-  const index4 = path.join(__dirname, '../index4.html')
-  const index5 = path.join(__dirname, '../index5.html')
-  const playerJs = path.join(__dirname, '../public/player.js')
-  const playerMinJs = path.join(__dirname, '../public/player.min.js')
-  const playerCss = path.join(__dirname, '../public/player.css')
-
-  const websocket = path.join(__dirname, '../public/websocket.html')
-
-  app.all('/*', function (req, res, next) {
+  app.all('/*', (req, res, next) => {
     // todo verify authenticated and reroute if necessary
     // console.log('req.url', req.url)
     next()
   })
 
-  app.get(['/', '/index.html'], (req, res) => {
-    res.sendFile(index)
-  })
-
-  app.get('/websocket.html', (req, res) => {
-    res.sendFile(websocket)
-  })
-
-  app.get('/index2.html', (req, res) => {
-    res.sendFile(index2)
-  })
-
-  app.get('/index3.html', (req, res) => {
-    res.sendFile(index3)
-  })
-
-  app.get('/index4.html', (req, res) => {
-    res.sendFile(index4)
-  })
-
-  app.get('/index5.html', (req, res) => {
-    res.sendFile(index5)
-  })
-
-  app.get('/public/player.js', (req, res) => {
-    res.sendFile(playerJs)
-  })
-
-  app.get('/public/player.min.js', (req, res) => {
-    res.sendFile(playerMinJs)
-  })
-
-  app.get('/public/player.css', (req, res) => {
-    res.sendFile(playerCss)
-  })
+  app.use(express.static('www'))
 
   app.param('id', (req, res, next, id) => {
     // console.log('parse id')
@@ -111,9 +64,17 @@ module.exports = (app) => {
         return res.status(404)
           .end(`cmd type not found for stream ${res.locals.id}`)
       case 'debug' :
-        return res.end(inspect(res.locals.stream, { sorted: true, showHidden: false, compact: false, depth: 2, colors: false, breakLength: 200, getters: true}))
+        return res.end(inspect(res.locals.stream, {
+          sorted: true,
+          showHidden: false,
+          compact: false,
+          depth: 2,
+          colors: false,
+          breakLength: 200,
+          getters: true
+        }))
       default :
-        res.status(404)
+        return res.status(404)
           .end(`${type} type not found for stream ${res.locals.id}`)
     }
   })

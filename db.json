@@ -550,7 +550,7 @@
     "hlsListSize": 3
   },
   {
-    "id": "forteen",
+    "id": "fourteen",
     "name": "garage 4",
     "logLevel": "quiet",
     "params": [
@@ -588,7 +588,7 @@
       "image2pipe",
       "pipe:4"
     ],
-    "hlsBase": "forteen",
+    "hlsBase": "fourteen",
     "hlsListSize": 3
   }
 ]
