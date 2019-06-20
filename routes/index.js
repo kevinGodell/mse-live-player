@@ -13,7 +13,7 @@ module.exports = (app) => {
 
   app.use(express.static('www'))
 
-  app.param('id', id)
+  app.param('id', id(app))
   app.param('type', type)
 
   app.get('/api/:id/:type/*', (req, res, next) => {
