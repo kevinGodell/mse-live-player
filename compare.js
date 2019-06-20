@@ -216,24 +216,24 @@ for (let i = 0; i < database.length; i++) {
 //adding path so that "pkg" can detect source files for packaging
 const path = require('path');
 console.log(path.join(__dirname, '/compare.html'));
-console.log(path.join(__dirname, '/public/player.js'));
-console.log(path.join(__dirname, '/public/player.min.js'));
-console.log(path.join(__dirname, '/public/player.css'));
+console.log(path.join(__dirname, '/www/player/player.js'));
+console.log(path.join(__dirname, '/www/player/player.min.js'));
+console.log(path.join(__dirname, '/www/player/player.css'));
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/compare.html');
 });
 
 app.get('/public/player.js', (req, res) => {
-    res.sendFile(__dirname + '/public/player.js');
+    res.sendFile(__dirname + '/www/player/player.js');
 });
 
 app.get('/public/player.min.js', (req, res) => {
-    res.sendFile(__dirname + '/public/player.min.js');
+    res.sendFile(__dirname + '/www/player/player.min.js');
 });
 
 app.get('/public/player.css', (req, res) => {
-    res.sendFile(__dirname + '/public/player.css');
+    res.sendFile(__dirname + '/www/player/player.css');
 });
 
 app.get('/starbucks.mp4', (req, res) => {

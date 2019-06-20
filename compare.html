@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>player comparison</title>
-    <link href='/www/public/player.css' rel='stylesheet' type='text/css'/>
+    <link href='/public/player.css' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <style>
         div.block {
@@ -80,7 +80,7 @@
 </div>-->
 
 <script src="/socket.io/socket.io.js">//must be included before player.js because socket.io is used for transport</script>
-<script src="/www/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
+<script src="/public/player.min.js">//script runs and builds mse players on top of video elements that have valid data-namespace attribute</script>
 <script>
     //can also be directly called later by specifically targeting window.videoPlayers[i]
     new VideoPlayer({video: document.getElementById('starbucks'), io: io, namespace: 'starbucks', controls: 'startstop|fullscreen|snapshot|cycle'}).start();
