@@ -56,7 +56,7 @@ for (let i = 0; i < database.length; i++) {
       reSpawnLimit: Number.POSITIVE_INFINITY,
       params: database[i].params,
       pipes: [
-        { stdioIndex: 1, destination: mp4frag },
+        { stdioIndex: 3, destination: mp4frag },
         { stdioIndex: 4, destination: pipe2jpeg }
       ],
       exitCallback: (code, signal) => {

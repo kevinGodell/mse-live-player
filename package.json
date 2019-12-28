@@ -36,16 +36,16 @@
   "homepage": "https://github.com/kevinGodell/mse-live-player#readme",
   "dependencies": {},
   "devDependencies": {
-    "express": "^4.16.4",
-    "ffmpeg-respawn": "^0.1.1",
-    "ffmpeg-static": "^2.4.0",
-    "mp4frag": "^0.1.1",
-    "pam-diff": "^0.13.5",
-    "pipe2jpeg": "^0.2.7",
+    "express": "^4.17.1",
+    "ffmpeg-respawn": "^0.3.0",
+    "ffmpeg-static": "^2.7.0",
+    "mp4frag": "^0.2.0",
+    "pam-diff": "^1.0.0",
+    "pipe2jpeg": "^0.3.0",
     "pipe2pam": "^0.6.2",
-    "socket.io": "^2.2.0",
-    "standard": "^12.0.1",
-    "ws": "^6.1.4"
+    "socket.io": "^2.3.0",
+    "standard": "^14.3.1",
+    "ws": "^7.2.1"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.1",
