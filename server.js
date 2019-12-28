@@ -44,6 +44,9 @@ for (let i = 0; i < database.length; i++) {
   // create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
   const mp4frag = new Mp4Frag({ hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize })
 
+  mp4frag.on('error', msg => {
+    console.error(`mp4frag error "${msg}" for id ${database[i].id}`);
+  })
   // create new jpeg parser that will keep most recent jpeg in memory with timestamp for client requests
   const pipe2jpeg = new P2J()
 
