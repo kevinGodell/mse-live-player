@@ -44,14 +44,12 @@ for (let i = 0; i < database.length; i++) {
   // create new mp4 segmenter that will create mime, initialization, and segments from data piped from ffmpeg
   const mp4frag = new Mp4Frag({ hlsBase: database[i].hlsBase, hlsListSize: database[i].hlsListSize })
 
-  mp4frag.on('error', msg => {
-    console.error(`mp4frag error "${msg}" for id ${database[i].id}`);
-  })
   // create new jpeg parser that will keep most recent jpeg in memory with timestamp for client requests
   const pipe2jpeg = new P2J()
 
   const ffmpeg = new FR(
     {
+      debug: false,
       path: ffmpegPath,
       logLevel: database[i].logLevel,
       killAfterStall: 10,
@@ -70,6 +68,15 @@ for (let i = 0; i < database.length; i++) {
       }
     })
     .start()
+
+  ffmpeg.on('stderr', data => {
+    console.log('stderr', data.toString())
+  })
+
+  mp4frag.on('error', msg => {
+    console.error(`mp4frag error "${msg}" for id ${database[i].id}`)
+    ffmpeg.stop().start()
+  })
 
   // streams[database[i].id] = { ffmpeg: ffmpeg, mp4frag: mp4frag, pipe2jpeg: pipe2jpeg }
   streams.set(database[i].id, { ffmpeg: ffmpeg, mp4frag: mp4frag, pipe2jpeg: pipe2jpeg })
@@ -186,8 +193,8 @@ for (let i = 0; i < database.length; i++) {
 sockets(io, streams)
 
 // need to be sudo on some systems to use port 80
-server.listen(80, () => {
-  console.log('listening on localhost:80')
+server.listen(8080, () => {
+  console.log('listening on localhost:8080')
 })
 
 module.exports = app
