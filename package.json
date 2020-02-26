@@ -29,6 +29,7 @@
     "express"
   ],
   "author": "Kevin Godell <kevin.godell@gmail.com>",
+  "contributors": ["Brian Jemilo II <jemiloii@gmail.com>"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kevinGodell/mse-live-player/issues"

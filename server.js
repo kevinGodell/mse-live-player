@@ -1,42 +1,25 @@
-// jshint esversion: 6, globalstrict: true, strict: true, bitwise: true, node: true, loopfunc: true
-
-'use strict'
-
-// const { inspect } = require('util')
-
-const sockets = require('./sockets')
-
 const express = require('express')
+const Mp4Frag = require('mp4frag')
+const FR = require('ffmpeg-respawn')
+const P2J = require('pipe2jpeg')
+const SocketIO = require('socket.io')
+const { path: ffmpegPath } = require('ffmpeg-static')
+const { Server } = require('http')
+const routes = require('./routes')
+const sockets = require('./sockets')
+const database = require('./db') // simulated data pulled from db, will add sqlite later todo
 
 const app = express()
-
-const routes = require('./routes')
+const server = new Server(app)
+const io = new SocketIO(server, { origins: '*:*', transports: ['websocket'] })/// *, {origins: allowedOrigins} */)
+const streams = new Map()
 
 routes(app)
-
-app.disable('x-powered-by')
-
-const server = require('http').Server(app)
 
 server.on('upgrade', (request, socket, head) => {
   // const pathname = request.url
   // console.log('http upgrade', request.url)
 })
-
-const io = require('socket.io')(server, { origins: '*:*', transports: ['websocket'] })/// *, {origins: allowedOrigins} */)
-
-const Mp4Frag = require('mp4frag')
-
-const FR = require('ffmpeg-respawn')
-
-const P2J = require('pipe2jpeg')
-
-const { path: ffmpegPath } = require('ffmpeg-static')
-
-// simulated data pulled from db, will add sqlite later todo
-const database = require('./db')
-
-const streams = new Map()
 
 app.locals.streams = streams
 

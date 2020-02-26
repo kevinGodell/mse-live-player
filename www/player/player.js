@@ -242,7 +242,7 @@ class VideoPlayer {
         str += `******************\n`;
         console.info(str);
     }
-    
+
     togglePlay() {
         if (this._playing === true) {
             this.stop();
@@ -325,7 +325,7 @@ class VideoPlayer {
     _onVideoError(event) {
         this._callback(`video error ${event.type}`);
     }
-    
+
     _onVideoLoadedData(event) {
         this._callback(null, `video loaded data ${event.type}`);
         if ('Promise' in window) {
@@ -406,7 +406,7 @@ class VideoPlayer {
     }
 
     ///////////////////// source buffer events /////////////////////////
-    
+
     _onSourceBufferError(event) {
         this._callback(`sourceBufferError ${event.type}`);
     }
@@ -458,7 +458,7 @@ class VideoPlayer {
     }
 
     ///////////////////// socket.io events //////////////////////////////
-    
+
     _onSocketConnect(event) {
         //this._callback(null, 'socket connect');
         //this._video.setAttribute('poster', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjY0MiIgaGVpZ2h0PSIzNiIgZmlsbD0ibm9uZSIvPjwvZz48Zz48dGV4dCBmaWxsPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAiIHg9IjE5NiIgeT0iMjYiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIHhtbDpzcGFjZT0icHJlc2VydmUiIHN0cm9rZT0iIzAwMCI+cmVxdWVzdGluZyBtaW1lIHR5cGU8L3RleHQ+PC9nPjwvc3ZnPg==');
@@ -466,12 +466,12 @@ class VideoPlayer {
         this._socket.addEventListener('mime', this.onMime, {capture: true, passive: true, once: true});
         this._socket.send('mime');
     }
-    
+
     _onSocketDisconnect(event) {
         this._callback(null, `socket disconnect "${event}"`);
         this.stop();
     }
-    
+
     _onSocketError(event) {
         this._callback(`socket error "${event}"`);
         this.stop();
