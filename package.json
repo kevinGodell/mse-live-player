@@ -45,7 +45,7 @@
     "pipe2pam": "^0.6.2",
     "socket.io": "^2.3.0",
     "standard": "^14.3.1",
-    "ws": "^7.2.1"
+    "ws": "^7.4.6"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.1",
